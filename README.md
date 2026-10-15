@@ -2,6 +2,32 @@
 
 A customizable Chrome new-tab extension inspired by iOS and visionOS. Glassify Tab combines a liquid-glass interface, website shortcuts, and productivity widgets in a personal dashboard.
 
+## Screenshots
+
+### Dashboard
+
+![Glassify Tab dashboard with widgets and website shortcuts](docs/screenshots/dashboard.png)
+
+### Glassify Studio
+
+![Glassify Studio layout presets and customization panel](docs/screenshots/studio.png)
+
+### Layout Gallery
+
+| Bento | Fluid Grid |
+| --- | --- |
+| ![Bento layout with shortcuts, tasks, weather, calendar, and hydration](docs/screenshots/bento.png) | ![Fluid Grid layout with adaptive shortcut rows and widgets](docs/screenshots/fluid-grid.png) |
+
+### Feed Layout
+
+![Feed layout with a shortcut rail and wide widget columns](docs/screenshots/feed.png)
+
+### Widget Library
+
+![Glassify Studio widget selector with productivity, time, weather, and developer tools](docs/screenshots/widget-library.png)
+
+Captured in the local web preview. Chrome-only widgets require the installed extension. These documentation images live in `docs/screenshots` and are not included in the production `dist` build.
+
 ## Features
 
 - **Flexible layouts:** Bento, Fluid Grid, Feed, and Mosaic presets, with grid and spacing controls.
