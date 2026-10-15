@@ -175,22 +175,18 @@ html body {
 
 /* Dark tint: smoked glass. A higher base alpha keeps white text readable even at 0% opacity. */
 [data-tint="dark"] .glass {
-  background: linear-gradient(
-    145deg,
-    rgb(36 36 46 / calc(0.32 + var(--glass-alpha) * 0.68)),
-    rgb(14 14 20 / calc(0.24 + var(--glass-alpha) * 0.76))
-  );
+  background: linear-gradient(145deg,
+      rgb(36 36 46 / calc(0.32 + var(--glass-alpha) * 0.68)),
+      rgb(14 14 20 / calc(0.24 + var(--glass-alpha) * 0.76)));
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.14), inset 0 -1px 0 rgb(255 255 255 / 0.03), var(--shadow-soft);
 }
 
 [data-tint="dark"] .glass::before {
-  background: linear-gradient(
-    160deg,
-    rgb(255 255 255 / 0.35),
-    rgb(255 255 255 / 0.04) 38%,
-    rgb(255 255 255 / 0.02) 62%,
-    rgb(255 255 255 / 0.16)
-  );
+  background: linear-gradient(160deg,
+      rgb(255 255 255 / 0.35),
+      rgb(255 255 255 / 0.04) 38%,
+      rgb(255 255 255 / 0.02) 62%,
+      rgb(255 255 255 / 0.16));
 }
 
 [data-glass="off"][data-tint="dark"] .glass {
@@ -230,7 +226,7 @@ html body {
 }
 
 /* Short dashboards sit in the optical centre instead of hugging the top; tall ones scroll normally */
-.dash > * {
+.dash>* {
   margin-top: auto;
   margin-bottom: auto;
 }
@@ -1286,6 +1282,7 @@ body:has(.idle-overlay) .roam-buddy {
 }
 
 @keyframes hydra-bob {
+
   0%,
   100% {
     transform: translateY(0);
@@ -1303,6 +1300,7 @@ body:has(.idle-overlay) .roam-buddy {
 }
 
 @keyframes hydra-blink {
+
   0%,
   92%,
   100% {
@@ -1315,6 +1313,7 @@ body:has(.idle-overlay) .roam-buddy {
 }
 
 @keyframes hydra-droop {
+
   0%,
   100% {
     transform: rotate(-3deg) scaleY(0.97);
@@ -1326,6 +1325,7 @@ body:has(.idle-overlay) .roam-buddy {
 }
 
 @keyframes hydra-jump {
+
   0%,
   100% {
     transform: translateY(0) scale(1, 1);
@@ -1406,6 +1406,7 @@ body:has(.idle-overlay) .roam-buddy {
 }
 
 @keyframes rb-shake {
+
   0%,
   100% {
     transform: rotate(-6deg);
@@ -1430,6 +1431,7 @@ body:has(.idle-overlay) .roam-buddy {
 }
 
 @keyframes rb-fade {
+
   0%,
   70% {
     opacity: 1;
@@ -1483,10 +1485,12 @@ body:has(.idle-overlay) .roam-buddy {
   justify-content: center;
   transition: gap 0.3s var(--ease-spring);
 }
+
 .bento-grid.snap-grid-surface.snap-grid-editing {
   min-height: calc(100vh - 180px);
   align-content: start;
 }
+
 .bento-grid.snap-grid-drop-active {
   outline: 1px dashed rgb(255 255 255 / 0.72);
   outline-offset: 10px;
@@ -1554,6 +1558,7 @@ body:has(.idle-overlay) .roam-buddy {
   left: auto;
   z-index: 5;
 }
+
 .widget-resize-handle {
   position: absolute;
   right: 8px;
@@ -1571,6 +1576,7 @@ body:has(.idle-overlay) .roam-buddy {
   cursor: nwse-resize;
   touch-action: none;
 }
+
 .widget-resize-handle:hover,
 .widget-resize-handle:focus-visible {
   background: var(--accent);
@@ -2056,7 +2062,7 @@ body:has(.idle-overlay) .roam-buddy {
     font-size: 10px;
   }
 
-  .system-perf-stat > span:last-child {
+  .system-perf-stat>span:last-child {
     max-width: 100%;
     overflow: hidden;
     font-size: 10px;
@@ -2382,7 +2388,7 @@ body:has(.idle-overlay) .roam-buddy {
   transition: transform 0.25s var(--ease-spring);
 }
 
-.section-summary + .section-chevron {
+.section-summary+.section-chevron {
   margin-left: 0;
 }
 
@@ -3078,14 +3084,14 @@ body:has(.idle-overlay) .roam-buddy {
 }
 
 /* Label above value so the card still fits at the smallest (2x2) size */
-.boost-stats > div {
+.boost-stats>div {
   display: flex;
   min-width: 0;
   flex-direction: column;
   line-height: 1.25;
 }
 
-.boost-stats > div > span {
+.boost-stats>div>span {
   font-size: var(--fs-caption2);
 }
 
@@ -3201,7 +3207,7 @@ body:has(.idle-overlay) .roam-buddy {
 }
 
 .dev-widget.toolbox-widget,
-.widget-slot.span-4x2 > .dev-widget {
+.widget-slot.span-4x2>.dev-widget {
   max-height: 300px;
 }
 
@@ -3229,7 +3235,7 @@ body:has(.idle-overlay) .roam-buddy {
   scrollbar-width: none;
 }
 
-.dev-list > li {
+.dev-list>li {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -3238,16 +3244,16 @@ body:has(.idle-overlay) .roam-buddy {
   transition: background 0.15s;
 }
 
-.dev-list > li:hover {
+.dev-list>li:hover {
   background: rgb(255 255 255 / 0.07);
 }
 
-.dev-list > li + li {
+.dev-list>li+li {
   box-shadow: inset 0 0.5px 0 var(--hairline);
 }
 
-.dev-list > li:hover,
-.dev-list > li:hover + li {
+.dev-list>li:hover,
+.dev-list>li:hover+li {
   box-shadow: none;
 }
 
@@ -3306,7 +3312,7 @@ body:has(.idle-overlay) .roam-buddy {
   transition: opacity 0.15s, background 0.15s;
 }
 
-.dev-list > li:hover .remove {
+.dev-list>li:hover .remove {
   opacity: 0.75;
 }
 
@@ -3616,7 +3622,7 @@ textarea.tool-input {
   gap: 4px;
 }
 
-.tool-rows > div {
+.tool-rows>div {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -3734,10 +3740,10 @@ textarea.tool-input {
   background: rgb(0 0 0 / 0.07);
 }
 
-[data-tone="light"] .dev-list > li:hover,
+[data-tone="light"] .dev-list>li:hover,
 [data-tone="light"] .status-item,
 [data-tone="light"] .port-tile a,
-[data-tone="light"] .tool-rows > div {
+[data-tone="light"] .tool-rows>div {
   background: rgb(0 0 0 / 0.05);
 }
 
@@ -3795,7 +3801,7 @@ textarea.tool-input {
   background: linear-gradient(145deg, #3f51d6, #1b1f5c);
 }
 
-.preset-preview > span {
+.preset-preview>span {
   position: absolute;
   border-radius: 3px;
 }
@@ -3899,7 +3905,7 @@ textarea.tool-input {
   font-variant-numeric: tabular-nums;
 }
 
-.widget-cat + .widget-cat {
+.widget-cat+.widget-cat {
   margin-top: 14px;
 }
 
@@ -3931,7 +3937,7 @@ textarea.tool-input {
   transition: background 0.15s;
 }
 
-.widget-row + .widget-row::before {
+.widget-row+.widget-row::before {
   content: "";
   position: absolute;
   top: 0;

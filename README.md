@@ -26,6 +26,12 @@ A customizable Chrome new-tab extension inspired by iOS and visionOS. Glassify T
 
 ![Glassify Studio widget selector with productivity, time, weather, and developer tools](docs/screenshots/widget-library.png)
 
+### Clock Screen
+
+![Full-screen Flip clock with the date, personal greeting, and daily quote](docs/screenshots/clock.png)
+
+Choose Classic, Bold, Digital, Flip, or Analog in Glassify Studio's Clock Screen settings. Use Preview to open the clock immediately, or enable Show When Idle to display it automatically.
+
 Captured in the local web preview. Chrome-only widgets require the installed extension. These documentation images live in `docs/screenshots` and are not included in the production `dist` build.
 
 ## Features
@@ -124,6 +130,18 @@ Open **Glassify Studio** from the dashboard to change its appearance and content
 ### Hydration Buddy
 
 The Hydration widget supports water goals, intake tracking, and reminder settings. A buddy can appear on the dashboard when a drink is overdue.
+
+| Water Tracker | Reminder Settings |
+| --- | --- |
+| ![Hydration widget showing water intake, daily goal, reminder timer, and quick-log controls](docs/screenshots/hydration.png) | ![Hydration settings for reminder intervals, daily goals, buddy visibility, and notifications](docs/screenshots/hydration-settings.png) |
+
+Log a drink with the +150, +250, or +500 mL controls and use Undo to reverse the last drink. Open the widget's settings to choose a daily goal, reminder interval, buddy behavior, and notification preferences.
+
+#### Roaming Buddy
+
+![Full dashboard with an overdue Hydration widget and the roaming buddy displaying a personalized sip reminder](docs/screenshots/roaming-buddy.png)
+
+The full-screen preview shows the buddy alongside the dashboard when a drink is overdue. Reduced motion was enabled for the capture to keep the buddy stationary.
 
 The optional **Buddy on every website** setting allows the buddy to appear on other websites. Enabling it requests additional website access. Background reminders and notifications require the installed extension and may depend on browser or operating-system notification settings.
 

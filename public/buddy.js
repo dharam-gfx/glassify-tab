@@ -1,28 +1,28 @@
-(() => {
-  if (window.top !== window || window.__glassifyBuddy) return;
-  window.__glassifyBuddy = true;
+( () => {
+    if ( window.top !== window || window.__glassifyBuddy ) return;
+    window.__glassifyBuddy = true;
 
-  const KEY = 'hydration';
-  const MINUTE = 60_000;
-  const W = 72;
-  const H = 88;
-  const SPEED = 110;
-  const RELATIONSHIP_LINES = {
-    mom: ['{name}, sip before Mom calls!', 'Mom says: water, now!', '{name}, even plants drink!'],
-    daddy: ['Hydrate like a champ, {name}!', 'Dad says: less scroll, more water!', 'Water break, {name}. Dad orders!'],
-    friend: ['Sip or I steal your Wi-Fi, {name}!', 'Besties drink water, {name}!', 'Hydrate, {name}. I dare you!'],
-    wife: ['Drink up, {name}, love!', 'Your wife says: sip, {name}!', 'Hydrate, {name}; kisses later!'],
-    husband: ['Your husband says: sip, {name}!', 'Water, {name}. Husband orders!', 'Hydrate, love; husband request!'],
-  };
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const KEY = 'hydration';
+    const MINUTE = 60_000;
+    const W = 72;
+    const H = 88;
+    const SPEED = 110;
+    const RELATIONSHIP_LINES = {
+        mom: ['{name}, sip before Mom calls!', 'Mom says: water, now!', '{name}, even plants drink!'],
+        daddy: ['Hydrate like a champ, {name}!', 'Dad says: less scroll, more water!', 'Water break, {name}. Dad orders!'],
+        friend: ['Sip or I steal your Wi-Fi, {name}!', 'Besties drink water, {name}!', 'Hydrate, {name}. I dare you!'],
+        wife: ['Drink up, {name}, love!', 'Your wife says: sip, {name}!', 'Hydrate, {name}; kisses later!'],
+        husband: ['Your husband says: sip, {name}!', 'Water, {name}. Husband orders!', 'Hydrate, love; husband request!'],
+    };
+    const reduceMotion = window.matchMedia( '(prefers-reduced-motion: reduce)' ).matches;
 
-  const thirstyFace =
-    '<path d="M32 58Q37 55 42 58M48 58Q53 55 58 58" class="line"/>' +
-    '<ellipse cx="45" cy="70" rx="4.5" ry="3.6" fill="#0b2540"/><ellipse cx="45" cy="72.4" rx="2.8" ry="1.8" fill="#ff7a9a"/>' +
-    '<path d="M14 30C14 30 10 36 10 38.5A4 4 0 0 0 18 38.5C18 36 14 30 14 30Z" class="sweat"/>';
-  const happyFace = '<path d="M33 58Q37 53 41 58M49 58Q53 53 57 58" class="line"/><path d="M38 67Q45 77 52 67Z" fill="#0b2540"/>';
+    const thirstyFace =
+        '<path d="M32 58Q37 55 42 58M48 58Q53 55 58 58" class="line"/>' +
+        '<ellipse cx="45" cy="70" rx="4.5" ry="3.6" fill="#0b2540"/><ellipse cx="45" cy="72.4" rx="2.8" ry="1.8" fill="#ff7a9a"/>' +
+        '<path d="M14 30C14 30 10 36 10 38.5A4 4 0 0 0 18 38.5C18 36 14 30 14 30Z" class="sweat"/>';
+    const happyFace = '<path d="M33 58Q37 53 41 58M49 58Q53 53 57 58" class="line"/><path d="M38 67Q45 77 52 67Z" fill="#0b2540"/>';
 
-  const css = `
+    const css = `
     :host { all: initial; }
     .buddy { position: fixed; top: 0; left: 0; z-index: 2147483646; width: ${W}px; height: ${H}px; pointer-events: none;
       transition-property: transform; transition-timing-function: linear; will-change: transform; font-family: system-ui, sans-serif; }
@@ -63,7 +63,7 @@
     @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
   `;
 
-  const svg = `
+    const svg = `
     <svg viewBox="0 0 90 110" aria-hidden="true">
       <g class="leg leg-l"><path d="M37 86L35 100"/><ellipse cx="33" cy="102" rx="6.5" ry="3.2"/></g>
       <g class="leg leg-r"><path d="M53 86L55 100"/><ellipse cx="57" cy="102" rx="6.5" ry="3.2"/></g>
@@ -80,145 +80,145 @@
       <path d="M70 64Q80 62 80 52" class="arm"/>
     </svg>`;
 
-  let host = null;
-  let parts = null;
-  let pos = null;
-  let timer = 0;
-  let lastDrink = 0;
-  let buddyTarget = 'friend';
-  let userName = '';
+    let host = null;
+    let parts = null;
+    let pos = null;
+    let timer = 0;
+    let lastDrink = 0;
+    let buddyTarget = 'friend';
+    let userName = '';
 
-  function pickLine() {
-    const lines = RELATIONSHIP_LINES[buddyTarget] || RELATIONSHIP_LINES.friend;
-    const line = lines[Math.floor(Math.random() * lines.length)];
-    return line.replaceAll('{name}', userName || 'friend');
-  }
-
-  function today() {
-    return new Date().toLocaleDateString('en-CA');
-  }
-
-  function isThirsty(s, now) {
-    if (!s || !s.roamEverywhere || s.roam === false) return false;
-    const intake = s.day === today() ? s.intake : 0;
-    if (intake >= s.goal || now < (s.snoozeUntil || 0)) return false;
-    if (s.workHours) {
-      const hour = new Date(now).getHours();
-      if (hour < 9 || hour >= 18) return false;
+    function pickLine() {
+        const lines = RELATIONSHIP_LINES[buddyTarget] || RELATIONSHIP_LINES.friend;
+        const line = lines[Math.floor( Math.random() * lines.length )];
+        return line.replaceAll( '{name}', userName || 'friend' );
     }
-    return now >= s.lastDrink + s.interval * MINUTE;
-  }
 
-  function say(text) {
-    parts.bubble.textContent = text || '';
-    parts.bubble.hidden = !text;
-    if (!text) return;
-    parts.bubble.style.setProperty('--bubble-shift', '0px');
-    parts.bubble.style.setProperty('--bubble-tail-shift', '0px');
-    requestAnimationFrame(fitBubble);
-  }
-
-  function fitBubble() {
-    if (!parts || parts.bubble.hidden || !pos) return;
-    const width = parts.bubble.offsetWidth;
-    const left = pos.x + W / 2 - width / 2;
-    const shift = left < 12 ? 12 - left : left + width > window.innerWidth - 12 ? window.innerWidth - 12 - left - width : 0;
-    const tailShift = Math.max(-width / 2 + 10, Math.min(width / 2 - 10, -shift));
-    parts.bubble.style.setProperty('--bubble-shift', `${shift}px`);
-    parts.bubble.style.setProperty('--bubble-tail-shift', `${tailShift}px`);
-  }
-
-  function place(next, dur) {
-    parts.buddy.style.transitionDuration = `${dur}s`;
-    parts.buddy.style.transform = `translate(${next.x}px, ${next.y}px)`;
-    if (pos) parts.figure.style.transform = next.x < pos.x ? 'scaleX(-1)' : '';
-    pos = next;
-  }
-
-  function pickSpot() {
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const margin = 24;
-    const edge = Math.random();
-    if (edge < 0.6) return { x: margin + Math.random() * (vw - W - margin * 2), y: vh - H - 12 };
-    const x = edge < 0.8 ? margin : vw - W - margin;
-    return { x, y: vh * 0.35 + Math.random() * (vh * 0.65 - H - 12) };
-  }
-
-  function step() {
-    const next = pickSpot();
-    const dur = Math.max(0.6, Math.hypot(next.x - pos.x, next.y - pos.y) / SPEED);
-    parts.buddy.classList.add('walking');
-    say('');
-    place(next, dur);
-    timer = setTimeout(() => {
-      parts.buddy.classList.remove('walking');
-      say(pickLine());
-      timer = setTimeout(step, 3000 + Math.random() * 3000);
-    }, dur * 1000);
-  }
-
-  function show() {
-    if (host) return;
-    host = document.createElement('glassify-buddy');
-    const root = host.attachShadow({ mode: 'closed' });
-    root.innerHTML = `<style>${css}</style><div class="buddy"><span class="bubble" hidden></span><div class="figure">${svg}</div></div>`;
-    parts = {
-      buddy: root.querySelector('.buddy'),
-      figure: root.querySelector('.figure'),
-      bubble: root.querySelector('.bubble'),
-      face: root.querySelector('.face'),
-    };
-    parts.face.innerHTML = thirstyFace;
-    document.documentElement.appendChild(host);
-    if (reduceMotion) {
-      place({ x: window.innerWidth - W - 24, y: window.innerHeight - H - 24 }, 0);
-      say(pickLine());
-      return;
+    function today() {
+        return new Date().toLocaleDateString( 'en-CA' );
     }
-    place({ x: -W, y: window.innerHeight - H - 12 }, 0);
-    timer = setTimeout(step, 400);
-  }
 
-  function hide(thanks) {
-    if (!host) return;
-    clearTimeout(timer);
-    const leaving = host;
-    host = null;
-    pos = null;
-    if (!thanks) return leaving.remove();
-    parts.buddy.classList.remove('walking');
-    parts.buddy.classList.add('leaving');
-    parts.face.innerHTML = happyFace;
-    say(userName ? `Thanks ${userName}!` : 'Thanks!');
-    setTimeout(() => leaving.remove(), 1800);
-  }
-
-  function check() {
-    if (!chrome.runtime?.id) {
-      clearInterval(poll);
-      hide(false);
-      return;
+    function isThirsty( s, now ) {
+        if ( !s || !s.roamEverywhere || s.roam === false ) return false;
+        const intake = s.day === today() ? s.intake : 0;
+        if ( intake >= s.goal || now < ( s.snoozeUntil || 0 ) ) return false;
+        if ( s.workHours ) {
+            const hour = new Date( now ).getHours();
+            if ( hour < 9 || hour >= 18 ) return false;
+        }
+        return now >= s.lastDrink + s.interval * MINUTE;
     }
-    chrome.storage.local.get(KEY, ({ [KEY]: s }) => {
-      if (chrome.runtime.lastError) return;
-      chrome.storage.sync.get('settings', ({ settings }) => {
-        if (chrome.runtime.lastError) return;
-        buddyTarget = RELATIONSHIP_LINES[s?.buddyTarget] ? s.buddyTarget : 'friend';
-        userName = settings?.userName?.trim() || '';
-        const drankNow = !!s && s.lastDrink > lastDrink && lastDrink !== 0;
-        lastDrink = s?.lastDrink || 0;
-        if (isThirsty(s, Date.now()) && document.visibilityState === 'visible') show();
-        else hide(drankNow);
-      });
-    });
-  }
 
-  chrome.storage.onChanged.addListener((changes, area) =>
-    (area === 'local' && changes[KEY]) || (area === 'sync' && changes.settings) ? check() : undefined
-  );
-  window.addEventListener('resize', fitBubble);
-  document.addEventListener('visibilitychange', check);
-  const poll = setInterval(check, 30_000);
-  check();
-})();
+    function say( text ) {
+        parts.bubble.textContent = text || '';
+        parts.bubble.hidden = !text;
+        if ( !text ) return;
+        parts.bubble.style.setProperty( '--bubble-shift', '0px' );
+        parts.bubble.style.setProperty( '--bubble-tail-shift', '0px' );
+        requestAnimationFrame( fitBubble );
+    }
+
+    function fitBubble() {
+        if ( !parts || parts.bubble.hidden || !pos ) return;
+        const width = parts.bubble.offsetWidth;
+        const left = pos.x + W / 2 - width / 2;
+        const shift = left < 12 ? 12 - left : left + width > window.innerWidth - 12 ? window.innerWidth - 12 - left - width : 0;
+        const tailShift = Math.max( -width / 2 + 10, Math.min( width / 2 - 10, -shift ) );
+        parts.bubble.style.setProperty( '--bubble-shift', `${shift}px` );
+        parts.bubble.style.setProperty( '--bubble-tail-shift', `${tailShift}px` );
+    }
+
+    function place( next, dur ) {
+        parts.buddy.style.transitionDuration = `${dur}s`;
+        parts.buddy.style.transform = `translate(${next.x}px, ${next.y}px)`;
+        if ( pos ) parts.figure.style.transform = next.x < pos.x ? 'scaleX(-1)' : '';
+        pos = next;
+    }
+
+    function pickSpot() {
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const margin = 24;
+        const edge = Math.random();
+        if ( edge < 0.6 ) return { x: margin + Math.random() * ( vw - W - margin * 2 ), y: vh - H - 12 };
+        const x = edge < 0.8 ? margin : vw - W - margin;
+        return { x, y: vh * 0.35 + Math.random() * ( vh * 0.65 - H - 12 ) };
+    }
+
+    function step() {
+        const next = pickSpot();
+        const dur = Math.max( 0.6, Math.hypot( next.x - pos.x, next.y - pos.y ) / SPEED );
+        parts.buddy.classList.add( 'walking' );
+        say( '' );
+        place( next, dur );
+        timer = setTimeout( () => {
+            parts.buddy.classList.remove( 'walking' );
+            say( pickLine() );
+            timer = setTimeout( step, 3000 + Math.random() * 3000 );
+        }, dur * 1000 );
+    }
+
+    function show() {
+        if ( host ) return;
+        host = document.createElement( 'glassify-buddy' );
+        const root = host.attachShadow( { mode: 'closed' } );
+        root.innerHTML = `<style>${css}</style><div class="buddy"><span class="bubble" hidden></span><div class="figure">${svg}</div></div>`;
+        parts = {
+            buddy: root.querySelector( '.buddy' ),
+            figure: root.querySelector( '.figure' ),
+            bubble: root.querySelector( '.bubble' ),
+            face: root.querySelector( '.face' ),
+        };
+        parts.face.innerHTML = thirstyFace;
+        document.documentElement.appendChild( host );
+        if ( reduceMotion ) {
+            place( { x: window.innerWidth - W - 24, y: window.innerHeight - H - 24 }, 0 );
+            say( pickLine() );
+            return;
+        }
+        place( { x: -W, y: window.innerHeight - H - 12 }, 0 );
+        timer = setTimeout( step, 400 );
+    }
+
+    function hide( thanks ) {
+        if ( !host ) return;
+        clearTimeout( timer );
+        const leaving = host;
+        host = null;
+        pos = null;
+        if ( !thanks ) return leaving.remove();
+        parts.buddy.classList.remove( 'walking' );
+        parts.buddy.classList.add( 'leaving' );
+        parts.face.innerHTML = happyFace;
+        say( userName ? `Thanks ${userName}!` : 'Thanks!' );
+        setTimeout( () => leaving.remove(), 1800 );
+    }
+
+    function check() {
+        if ( !chrome.runtime?.id ) {
+            clearInterval( poll );
+            hide( false );
+            return;
+        }
+        chrome.storage.local.get( KEY, ( { [KEY]: s } ) => {
+            if ( chrome.runtime.lastError ) return;
+            chrome.storage.sync.get( 'settings', ( { settings } ) => {
+                if ( chrome.runtime.lastError ) return;
+                buddyTarget = RELATIONSHIP_LINES[s?.buddyTarget] ? s.buddyTarget : 'friend';
+                userName = settings?.userName?.trim() || '';
+                const drankNow = !!s && s.lastDrink > lastDrink && lastDrink !== 0;
+                lastDrink = s?.lastDrink || 0;
+                if ( isThirsty( s, Date.now() ) && document.visibilityState === 'visible' ) show();
+                else hide( drankNow );
+            } );
+        } );
+    }
+
+    chrome.storage.onChanged.addListener( ( changes, area ) =>
+        ( area === 'local' && changes[KEY] ) || ( area === 'sync' && changes.settings ) ? check() : undefined
+    );
+    window.addEventListener( 'resize', fitBubble );
+    document.addEventListener( 'visibilitychange', check );
+    const poll = setInterval( check, 30_000 );
+    check();
+} )();

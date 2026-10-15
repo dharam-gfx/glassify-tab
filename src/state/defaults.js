@@ -66,25 +66,25 @@ export const DEFAULT_SETTINGS = {
   widgetsIntroduced: ['boost', 'hydration'],
 };
 
-const tile = (id, title, url, group) => ({ id, title, url, ...(group && { group }) });
+const tile = ( id, title, url, group ) => ( { id, title, url, ...( group && { group } ) } );
 
 export const DEFAULT_TILES = [
-  tile('google', 'Google', 'https://www.google.com/'),
-  tile('youtube', 'YouTube', 'https://www.youtube.com/'),
-  tile('slack', 'Slack', 'https://app.slack.com/'),
-  tile('notion', 'Notion', 'https://www.notion.so/'),
-  tile('figma', 'Figma', 'https://www.figma.com/', 'Creative Apps'),
-  tile('github', 'GitHub', 'https://github.com/'),
-  tile('amazon', 'Amazon', 'https://www.amazon.com/'),
-  tile('gmail', 'Gmail', 'https://mail.google.com/'),
-  tile('netflix', 'Netflix', 'https://www.netflix.com/'),
-  tile('photos', 'Photos', 'https://photos.google.com/', 'Creative Apps'),
-  tile('photoshop', 'Photoshop', 'https://photoshop.adobe.com/', 'Creative Apps'),
-  tile('telegram', 'Telegram', 'https://web.telegram.org/', 'Social'),
-  tile('whatsapp', 'WhatsApp', 'https://web.whatsapp.com/', 'Social'),
-  tile('drive', 'Drive', 'https://drive.google.com/'),
-  tile('spotify', 'Spotify', 'https://open.spotify.com/'),
-  tile('trello', 'Trello', 'https://trello.com/'),
+  tile( 'google', 'Google', 'https://www.google.com/' ),
+  tile( 'youtube', 'YouTube', 'https://www.youtube.com/' ),
+  tile( 'slack', 'Slack', 'https://app.slack.com/' ),
+  tile( 'notion', 'Notion', 'https://www.notion.so/' ),
+  tile( 'figma', 'Figma', 'https://www.figma.com/', 'Creative Apps' ),
+  tile( 'github', 'GitHub', 'https://github.com/' ),
+  tile( 'amazon', 'Amazon', 'https://www.amazon.com/' ),
+  tile( 'gmail', 'Gmail', 'https://mail.google.com/' ),
+  tile( 'netflix', 'Netflix', 'https://www.netflix.com/' ),
+  tile( 'photos', 'Photos', 'https://photos.google.com/', 'Creative Apps' ),
+  tile( 'photoshop', 'Photoshop', 'https://photoshop.adobe.com/', 'Creative Apps' ),
+  tile( 'telegram', 'Telegram', 'https://web.telegram.org/', 'Social' ),
+  tile( 'whatsapp', 'WhatsApp', 'https://web.whatsapp.com/', 'Social' ),
+  tile( 'drive', 'Drive', 'https://drive.google.com/' ),
+  tile( 'spotify', 'Spotify', 'https://open.spotify.com/' ),
+  tile( 'trello', 'Trello', 'https://trello.com/' ),
 ];
 
 export const TILE_BGS = [
@@ -99,7 +99,7 @@ export const TILE_BGS = [
 ];
 
 /** Only allow known presets or plain hex colours into inline styles. */
-export function sanitizeBg(value) {
-  if (TILE_BGS.includes(value) || /^#[0-9a-f]{6}$/i.test(value)) return value;
+export function sanitizeBg( value ) {
+  if ( TILE_BGS.includes( value ) || /^#[0-9a-f]{6}$/i.test( value ) ) return value;
   return undefined;
 }
