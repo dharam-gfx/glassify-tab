@@ -1,0 +1,53 @@
+// Popular destinations users can search for instead of typing a URL by hand.
+export const SITE_CATALOG = [
+  { name: 'Google', url: 'https://www.google.com/' },
+  { name: 'YouTube', url: 'https://www.youtube.com/' },
+  { name: 'Gmail', url: 'https://mail.google.com/' },
+  { name: 'Google Drive', url: 'https://drive.google.com/' },
+  { name: 'Google Photos', url: 'https://photos.google.com/' },
+  { name: 'Google Calendar', url: 'https://calendar.google.com/' },
+  { name: 'Google Maps', url: 'https://maps.google.com/' },
+  { name: 'Google Docs', url: 'https://docs.google.com/' },
+  { name: 'Slack', url: 'https://app.slack.com/' },
+  { name: 'Notion', url: 'https://www.notion.so/' },
+  { name: 'Figma', url: 'https://www.figma.com/' },
+  { name: 'GitHub', url: 'https://github.com/' },
+  { name: 'GitLab', url: 'https://gitlab.com/' },
+  { name: 'Amazon', url: 'https://www.amazon.com/' },
+  { name: 'Netflix', url: 'https://www.netflix.com/' },
+  { name: 'Spotify', url: 'https://open.spotify.com/' },
+  { name: 'Trello', url: 'https://trello.com/' },
+  { name: 'Asana', url: 'https://app.asana.com/' },
+  { name: 'Linear', url: 'https://linear.app/' },
+  { name: 'Jira', url: 'https://www.atlassian.com/software/jira' },
+  { name: 'Telegram', url: 'https://web.telegram.org/' },
+  { name: 'WhatsApp', url: 'https://web.whatsapp.com/' },
+  { name: 'X (Twitter)', url: 'https://x.com/' },
+  { name: 'Instagram', url: 'https://www.instagram.com/' },
+  { name: 'Reddit', url: 'https://www.reddit.com/' },
+  { name: 'LinkedIn', url: 'https://www.linkedin.com/' },
+  { name: 'Facebook', url: 'https://www.facebook.com/' },
+  { name: 'Pinterest', url: 'https://www.pinterest.com/' },
+  { name: 'Discord', url: 'https://discord.com/app' },
+  { name: 'Twitch', url: 'https://www.twitch.tv/' },
+  { name: 'Adobe Photoshop', url: 'https://photoshop.adobe.com/' },
+  { name: 'Adobe Express', url: 'https://express.adobe.com/' },
+  { name: 'Canva', url: 'https://www.canva.com/' },
+  { name: 'Dropbox', url: 'https://www.dropbox.com/' },
+  { name: 'OneDrive', url: 'https://onedrive.live.com/' },
+  { name: 'Outlook', url: 'https://outlook.live.com/' },
+  { name: 'Microsoft Teams', url: 'https://teams.microsoft.com/' },
+  { name: 'Zoom', url: 'https://zoom.us/' },
+  { name: 'Wikipedia', url: 'https://www.wikipedia.org/' },
+  { name: 'Amazon Prime Video', url: 'https://www.primevideo.com/' },
+  { name: 'Disney+', url: 'https://www.disneyplus.com/' },
+  { name: 'ChatGPT', url: 'https://chat.openai.com/' },
+  { name: 'Claude', url: 'https://claude.ai/' },
+  { name: 'Perplexity', url: 'https://www.perplexity.ai/' },
+];
+
+export function searchSites(query) {
+  const q = query.trim().toLowerCase();
+  if (!q) return [];
+  return SITE_CATALOG.filter((s) => s.name.toLowerCase().includes(q)).slice(0, 6);
+}
