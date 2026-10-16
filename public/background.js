@@ -2,11 +2,16 @@ const KEY = 'hydration';
 const NOTIFIED_KEY = 'hydrationNotifiedAt';
 const ALARM = 'hydration-tick';
 const NOTE_ID = 'hydration-reminder';
+const EYE_BREAK_KEY = 'eyeBreak';
+const EYE_BREAK_NOTIFIED_KEY = 'eyeBreakNotifiedAt';
+const EYE_BREAK_NOTE_ID = 'eye-break-reminder';
+const EYE_BREAK_PREVIEW_NOTE_ID = 'eye-break-preview';
 const SCRIPT_ID = 'hydration-buddy';
 const ALL_SITES = { origins: ['<all_urls>'] };
 const MINUTE = 60_000;
 const SNOOZE_MIN = 10;
 const DROP = 'M50 6C50 6 16 50 16 78A34 34 0 0 0 84 78C84 50 50 6 50 6Z';
+let eyeBreakCheckInFlight = false;
 
 const today = () => new Date().toLocaleDateString( 'en-CA' );
 
@@ -105,6 +110,59 @@ async function evaluate() {
     } );
 }
 
+async function evaluateEyeBreak() {
+    if ( eyeBreakCheckInFlight ) return;
+    eyeBreakCheckInFlight = true;
+    try {
+        const [local, synced] = await Promise.all( [
+            chrome.storage.local.get( [EYE_BREAK_KEY, EYE_BREAK_NOTIFIED_KEY] ),
+            chrome.storage.sync.get( 'settings' ),
+        ] );
+        const state = local[EYE_BREAK_KEY];
+        const layouts = Object.values( synced.settings?.layoutWidgets ?? {} );
+        const enabledInLayout = layouts.some( ( widgets ) => widgets.includes( 'eyeBreak' ) );
+        if ( !state?.enabled || !enabledInLayout ) {
+            await chrome.notifications.clear( EYE_BREAK_NOTE_ID );
+            return;
+        }
+
+        const now = Date.now();
+        let next = state;
+        if ( next.breakUntil && now >= next.breakUntil ) {
+            next = { ...next, breakUntil: 0, pausedRemaining: 0, pausedBreak: false };
+        }
+        if ( !next.breakUntil && now >= next.nextAt ) {
+            next = { ...next, breakUntil: now + 20_000, nextAt: now + 20 * MINUTE, pausedRemaining: 0 };
+        }
+        if ( next !== state ) await chrome.storage.local.set( { [EYE_BREAK_KEY]: next } );
+        if ( !next.breakUntil ) {
+            await chrome.notifications.clear( EYE_BREAK_NOTE_ID );
+            return;
+        }
+
+        const [active] = await chrome.tabs.query( { active: true, lastFocusedWindow: true } );
+        const onDashboard = active?.url?.startsWith( chrome.runtime.getURL( '' ) ) || active?.url === 'chrome://newtab/';
+        if ( onDashboard ) {
+            await chrome.notifications.clear( EYE_BREAK_NOTE_ID );
+            return;
+        }
+        if ( local[EYE_BREAK_NOTIFIED_KEY] === next.breakUntil ) return;
+
+        await chrome.storage.local.set( { [EYE_BREAK_NOTIFIED_KEY]: next.breakUntil } );
+        await chrome.notifications.clear( EYE_BREAK_NOTE_ID );
+        await chrome.notifications.create( EYE_BREAK_NOTE_ID, {
+            type: 'basic',
+            iconUrl: 'icons/icon128.png',
+            title: 'Eye break',
+            message: 'Look about 20 feet away and relax your eyes for 20 seconds.',
+            priority: 0,
+            silent: true,
+        } );
+    } finally {
+        eyeBreakCheckInFlight = false;
+    }
+}
+
 async function syncBuddyScript() {
     const { [KEY]: s } = await chrome.storage.local.get( KEY );
     const want = !!s?.roamEverywhere && s.roam !== false && ( await chrome.permissions.contains( ALL_SITES ) );
@@ -122,6 +180,7 @@ async function syncBuddyScript() {
 
 function refresh() {
     evaluate().catch( () => { } );
+    evaluateEyeBreak().catch( () => { } );
     syncBuddyScript().catch( () => { } );
 }
 
@@ -137,8 +196,17 @@ chrome.runtime.onStartup.addListener( () => {
     ensureAlarm();
     refresh();
 } );
-chrome.alarms.onAlarm.addListener( ( alarm ) => alarm.name === ALARM && evaluate().catch( () => { } ) );
-chrome.storage.onChanged.addListener( ( changes, area ) => area === 'local' && changes[KEY] && refresh() );
+chrome.alarms.onAlarm.addListener( ( alarm ) => {
+    if ( alarm.name !== ALARM ) return;
+    evaluate().catch( () => { } );
+    evaluateEyeBreak().catch( () => { } );
+} );
+chrome.storage.onChanged.addListener( ( changes, area ) => {
+    if ( area === 'local' && changes[KEY] ) refresh();
+    if ( ( area === 'local' && changes[EYE_BREAK_KEY] ) || ( area === 'sync' && changes.settings ) ) {
+        evaluateEyeBreak().catch( () => { } );
+    }
+} );
 chrome.permissions.onAdded.addListener( refresh );
 chrome.permissions.onRemoved.addListener( refresh );
 
@@ -158,6 +226,12 @@ chrome.notifications.onButtonClicked.addListener( async ( id, index ) => {
 
 chrome.notifications.onClicked.addListener( ( id ) => {
     if ( id !== NOTE_ID ) return;
+    chrome.notifications.clear( id );
+    chrome.tabs.create( {} );
+} );
+
+chrome.notifications.onClicked.addListener( ( id ) => {
+    if ( id !== EYE_BREAK_NOTE_ID && id !== EYE_BREAK_PREVIEW_NOTE_ID ) return;
     chrome.notifications.clear( id );
     chrome.tabs.create( {} );
 } );

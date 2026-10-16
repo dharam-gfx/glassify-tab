@@ -5,7 +5,7 @@ import { WIDGET_CATALOG } from '../widgets/catalog';
 
 export default function FeedStream() {
     const { tiles, settings, removeWidget } = useStore();
-    const enabled = settings.layoutWidgets.feed ?? [];
+    const enabled = ( settings.layoutWidgets.feed ?? [] ).filter( ( id ) => WIDGET_CATALOG[id] );
     const order = useWidgetOrder( 'feed', enabled );
     return (
         <div className="feed">

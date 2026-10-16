@@ -30,6 +30,8 @@
   "host_permissions": [
     "https://api.open-meteo.com/*",
     "https://geocoding-api.open-meteo.com/*",
+    "https://feeds.bbci.co.uk/*",
+    "https://hnrss.org/*",
     "https://api.github.com/*",
     "https://hacker-news.firebaseio.com/*",
     "https://registry.npmjs.org/*",

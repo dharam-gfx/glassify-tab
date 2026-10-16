@@ -3,13 +3,14 @@ import {
   CalendarDays,
   CloudSun,
   Code2,
+  Eye,
   GitCommitHorizontal,
   GitPullRequest,
   Github,
   GlassWater,
   Globe2,
   History,
-  Hourglass,
+  BookmarkPlus,
   ListChecks,
   Newspaper,
   NotebookPen,
@@ -22,7 +23,6 @@ import {
   Wrench,
 } from 'lucide-react';
 import CalendarWidget from './CalendarWidget';
-import DayProgressWidget from './DayProgressWidget';
 import FocusTimerWidget from './FocusTimerWidget';
 import HydrationWidget from './HydrationWidget';
 import NotesWidget from './NotesWidget';
@@ -42,6 +42,9 @@ import SnippetsWidget from './dev/SnippetsWidget';
 import StatusWidget from './dev/StatusWidget';
 import ToolboxWidget from './dev/ToolboxWidget';
 import BoostWidget from './BoostWidget';
+import EyeBreakWidget from './EyeBreakWidget';
+import RssNewsWidget from './RssNewsWidget';
+import ReadingQueueWidget from './ReadingQueueWidget';
 
 export const WIDGET_CATEGORIES = [
   { id: 'productivity', name: 'Productivity', color: '#30d158' },
@@ -49,6 +52,8 @@ export const WIDGET_CATEGORIES = [
   { id: 'developer', name: 'Developer', color: '#5e5ce6' },
   { id: 'browser', name: 'Browser', color: '#ff9f0a' },
   { id: 'system', name: 'System', color: '#bf5af2' },
+  { id: 'mindfulness', name: 'Mindfulness', color: '#64d2ff' },
+  { id: 'feeds', name: 'Finance & Feeds', color: '#ff9f0a' },
 ];
 
 // Single source of truth for every widget users can add to a layout.
@@ -60,7 +65,7 @@ export const WIDGET_CATALOG = {
   weather: { name: 'Weather', description: 'Live conditions and next hours', category: 'time', icon: CloudSun, span: 'span-2x2', Component: WeatherWidget },
   calendar: { name: 'Calendar', description: 'Month view with today highlighted', category: 'time', icon: CalendarDays, span: 'span-2x2', Component: CalendarWidget },
   worldClock: { name: 'World Clock', description: 'Time in up to 5 cities', category: 'time', icon: Globe2, span: 'span-2x2', Component: WorldClockWidget },
-  progress: { name: 'Day Progress', description: 'How much of the day, week, month and year has passed', category: 'time', icon: Hourglass, span: 'span-2x2', Component: DayProgressWidget },
+  progress: { name: 'Reading Queue', description: 'Save links, read the next article, and track what you finished', category: 'productivity', icon: BookmarkPlus, span: 'span-2x2', Component: ReadingQueueWidget },
   toolbox: { name: 'Dev Toolbox', description: 'Timestamp, UUID, Base64, URL and JSON tools', category: 'developer', icon: Wrench, span: 'span-4x2', Component: ToolboxWidget },
   ghRepos: { name: 'GitHub Repos', description: 'Stars, forks and issues for repos you follow', category: 'developer', icon: Github, span: 'span-2x2', Component: GitHubReposWidget },
   prs: { name: 'Pull Requests', description: 'Your open PRs and review requests (token)', category: 'developer', icon: GitPullRequest, span: 'span-2x2', Component: PullRequestsWidget },
@@ -74,6 +79,8 @@ export const WIDGET_CATALOG = {
   recent: { name: 'Recently Closed', description: 'Reopen tabs you just closed', category: 'browser', icon: History, span: 'span-2x2', Component: RecentlyClosedWidget },
   boost: { name: 'Browser Boost', description: 'Free RAM, clear cache, close duplicate tabs', category: 'browser', icon: Rocket, span: 'span-2x2', Component: BoostWidget },
   perf: { name: 'System Performance', description: 'Live CPU, memory and tab count', category: 'system', icon: Activity, span: 'span-4x2', Component: SystemPerfWidget },
+  eyeBreak: { name: 'Eye Break', description: '20-20-20 reminder to rest your eyes', category: 'mindfulness', icon: Eye, span: 'span-2x2', Component: EyeBreakWidget },
+  rss: { name: 'RSS News Digest', description: 'Tech, world, business, and Hacker News headlines', category: 'feeds', icon: Newspaper, span: 'span-2x2', Component: RssNewsWidget },
 };
 
 export const WIDGET_IDS = Object.keys(WIDGET_CATALOG);

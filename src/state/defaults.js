@@ -42,6 +42,7 @@ export const DEFAULT_SETTINGS = {
   fetchFavicon: true,
   hdIcons: true,
   openIn: 'same',
+  searchProvider: 'google',
   tileBg: '#ffffff',
   weatherCity: '',
   tempUnit: 'fahrenheit',

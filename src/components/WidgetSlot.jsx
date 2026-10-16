@@ -66,6 +66,11 @@ export default function WidgetSlot({ id, layout, defaultSize = '2x2', mode = 'gr
   const availableSizes = sizesFor(layout, mode, gridCols);
   const size = availableSizes.includes(saved) ? saved : defaultSize;
   const displaySize = previewSize ?? size;
+  const responsiveRss = id === 'rss' && gridCols <= 2;
+  const effectiveContentRows = fitRows ? contentRows : 1;
+  const placementStyle = responsiveRss
+    ? { gridColumn: '1 / span 2', gridRow: 'auto' }
+    : slotStyle(displaySize, mode, gridCols, effectiveContentRows);
 
   useLayoutEffect(() => {
     if (!fitRows) return;
@@ -151,7 +156,7 @@ export default function WidgetSlot({ id, layout, defaultSize = '2x2', mode = 'gr
     <div
       ref={slotRef}
       className={`widget-slot${over ? ' drop-target' : ''}`}
-      style={slotStyle(displaySize, mode, gridCols, fitRows ? contentRows : 1)}
+      style={placementStyle}
       draggable={editMode}
       onDragStart={(e) => {
         if (e.target.closest('.widget-resize-handle')) {

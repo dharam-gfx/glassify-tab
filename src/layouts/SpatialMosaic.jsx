@@ -14,7 +14,7 @@ export default function SpatialMosaic() {
     else loose.push(t);
   }
 
-  const enabled = settings.layoutWidgets.mosaic ?? [];
+  const enabled = (settings.layoutWidgets.mosaic ?? []).filter((id) => WIDGET_CATALOG[id]);
   const groupIds = [...groups.keys()].map((name) => `group:${name}`);
   const order = useWidgetOrder('mosaic', [...enabled, ...groupIds]);
 

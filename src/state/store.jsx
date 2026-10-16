@@ -69,18 +69,30 @@ function usePersist(key, value) {
   }, [key, value]);
 }
 
-function mergeSettings(saved) {
-  // Fill in any layouts missing from an older save instead of dropping their widgets.
-  const layoutWidgets = { ...DEFAULT_SETTINGS.layoutWidgets, ...saved?.layoutWidgets };
+function sanitizeLayoutWidgets(savedLayouts) {
+  const layoutWidgets = { ...DEFAULT_SETTINGS.layoutWidgets };
+  if (!savedLayouts || typeof savedLayouts !== 'object') return layoutWidgets;
+  for (const layout of Object.keys(layoutWidgets)) {
+    const ids = savedLayouts[layout];
+    if (Array.isArray(ids)) layoutWidgets[layout] = [...new Set(ids.filter((id) => WIDGET_IDS.includes(id)))];
+  }
+  return layoutWidgets;
+}
+
+function addIntroducedWidgets(layoutWidgets, saved) {
   const introduced = Array.isArray(saved?.widgetsIntroduced) ? saved.widgetsIntroduced : [];
-  if (saved) {
-    for (const id of DEFAULT_SETTINGS.widgetsIntroduced) {
-      if (introduced.includes(id)) continue;
-      for (const layout of Object.keys(layoutWidgets)) {
-        if (!layoutWidgets[layout].includes(id)) layoutWidgets[layout] = [...layoutWidgets[layout], id];
-      }
+  if (!saved) return layoutWidgets;
+  for (const id of DEFAULT_SETTINGS.widgetsIntroduced) {
+    if (introduced.includes(id)) continue;
+    for (const layout of Object.keys(layoutWidgets)) {
+      if (!layoutWidgets[layout].includes(id)) layoutWidgets[layout] = [...layoutWidgets[layout], id];
     }
   }
+  return layoutWidgets;
+}
+
+function mergeSettings(saved) {
+  const layoutWidgets = addIntroducedWidgets(sanitizeLayoutWidgets(saved?.layoutWidgets), saved);
   return { ...DEFAULT_SETTINGS, ...saved, layoutWidgets, widgetsIntroduced: DEFAULT_SETTINGS.widgetsIntroduced };
 }
 

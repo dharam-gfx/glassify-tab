@@ -43,9 +43,11 @@ Captured in the local web preview. Chrome-only widgets require the installed ext
 - **Flexible layouts:** Bento, Fluid Grid, Feed, and Mosaic presets, with grid and spacing controls.
 - **Personal appearance:** Built-in wallpapers, custom photo uploads, font selection, and glass-style controls through Glassify Studio.
 - **Website shortcuts:** Editable tiles with custom icons or text fallbacks, plus app groups.
-- **Productivity tools:** Tasks, auto-saved notes, a Pomodoro timer, and hydration tracking.
+- **Productivity tools:** Tasks, auto-saved notes, a Pomodoro timer, hydration tracking, and a local reading queue.
+- **Mindfulness:** An optional 20-20-20 eye-break reminder with a quiet 20-second rest prompt.
 - **Time and weather:** Local conditions, a calendar, world clocks, and day-progress indicators.
 - **Developer dashboard:** GitHub activity, pull requests, package information, news, snippets, and utility tools.
+- **News digest:** Optional RSS headlines from technology, world, business, and Hacker News feeds.
 - **Browser tools:** Most-visited sites, recently closed tabs, resource monitoring, and browser cleanup actions.
 - **Idle display:** A customizable clock screen when the dashboard is idle.
 - **Settings backup:** Export and import dashboard settings and shortcut tiles as JSON.
@@ -60,10 +62,12 @@ Enable or remove widgets through Glassify Studio. Widget selection and ordering 
 | Productivity | Notes | Keep an auto-saved scratchpad. |
 | Productivity | Focus Timer | Run Pomodoro sessions with short and long breaks. |
 | Productivity | Hydration | Track water intake, set a daily goal, and receive sip reminders. |
+| Mindfulness | Eye Break | Every 20 minutes, look about 20 feet away for 20 seconds; pause or finish breaks anytime. |
+| Finance & Feeds | RSS News Digest | Browse cached technology, world, business, and Hacker News headlines. |
 | Time & Weather | Weather | View current conditions and upcoming hours. |
 | Time & Weather | Calendar | Browse a month view with today highlighted. |
 | Time & Weather | World Clock | Track time in up to five cities. |
-| Time & Weather | Day Progress | See progress through the day, week, month, and year. |
+| Productivity | Reading Queue | Save links to read later, mark them read, or open the next unread article. |
 | Developer | Dev Toolbox | Work with timestamps, UUIDs, Base64, URLs, and JSON. |
 | Developer | GitHub Repos | Follow repository stars, forks, and issues. |
 | Developer | Pull Requests | View your open pull requests and review requests; requires a GitHub token. |

@@ -6,7 +6,7 @@ import { WIDGET_CATALOG } from '../widgets/catalog';
 
 function GridLayout({ layout }) {
   const { tiles, settings, removeWidget } = useStore();
-  const enabled = settings.layoutWidgets[layout] ?? [];
+  const enabled = (settings.layoutWidgets[layout] ?? []).filter((id) => WIDGET_CATALOG[id]);
   const order = useWidgetOrder(layout, enabled);
   const widgetSlots = order.ids.map((id) => {
     const w = WIDGET_CATALOG[id];
