@@ -10,6 +10,7 @@ export const CLOCK_STYLES = [
   { value: 'digital', label: 'Digital', sample: '9:41:07' },
   { value: 'flip', label: 'Flip', sample: '09 41' },
   { value: 'analog', label: 'Analog', sample: '' },
+  { value: 'dual', label: 'Dual Clock', sample: '9:41\n7:41' },
 ];
 
 const WAKE_EVENTS = ['mousemove', 'mousedown', 'keydown', 'wheel', 'touchstart'];
@@ -80,7 +81,11 @@ export default function IdleOverlay() {
   return (
     <div className={`idle-overlay clock-${settings.clockStyle}`} role="dialog" aria-label="Clock screen">
       <div className="idle-date">{now.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })}</div>
-      <Clock t={timeParts(now, settings.clock24h)} />
+      {settings.clockStyle === 'dual' ? (
+        <DualClock now={now} timeZone={settings.clockTimeZone} is24h={settings.clock24h} />
+      ) : (
+        <Clock t={timeParts(now, settings.clock24h)} />
+      )}
       <div className="idle-greeting">
         {greeting(now.getHours())}
         {name && `, ${name}`}
@@ -118,6 +123,31 @@ function ClassicClock({ t }) {
     <div className="idle-time">
       {t.hh}:{t.mm}
       {t.meridiem && <span className="idle-meridiem">{t.meridiem}</span>}
+    </div>
+  );
+}
+
+function DualClock({ now, timeZone, is24h }) {
+  const city = timeZone?.split('/').at(-1).replaceAll('_', ' ');
+  const time = timeZone
+    ? now.toLocaleTimeString([], { timeZone, hour: 'numeric', minute: '2-digit', hour12: !is24h })
+    : null;
+  const date = timeZone
+    ? now.toLocaleDateString([], { timeZone, weekday: 'long', month: 'long', day: 'numeric' })
+    : null;
+
+  return (
+    <div className="idle-dual">
+      <div className="idle-dual-primary">
+        <span className="idle-dual-kicker">Local time</span>
+        <ClassicClock t={timeParts(now, is24h)} />
+      </div>
+      <div className="idle-dual-secondary">
+        <span className="idle-dual-kicker">Second city</span>
+        {city && <span className="idle-dual-city">{city}</span>}
+        {time ? <time className="idle-dual-time">{time}</time> : <span className="idle-dual-empty">Choose a city in Clock Screen settings</span>}
+        {date && <span className="idle-dual-date">{date}</span>}
+      </div>
     </div>
   );
 }

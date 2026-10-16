@@ -16,6 +16,9 @@ import { FONTS, fontAssets } from '../lib/fonts';
 const PREVIEW_FONT_CSS = FONTS.map( ( f ) => fontAssets( f.id ).css ).join( '' );
 import { CLOCK_STYLES, PREVIEW_IDLE_EVENT } from '../components/IdleOverlay';
 
+const CLOCK_TIME_ZONES = Intl.supportedValuesOf?.( 'timeZone' ) ?? ['America/New_York', 'Europe/London', 'Asia/Tokyo'];
+const clockCity = ( zone ) => zone.split( '/' ).at( -1 ).replaceAll( '_', ' ' );
+
 const GRID_TYPES = ['bento', 'ordered', 'fluid', 'custom'].map( ( v ) => ( {
     value: v,
     label: v[0].toUpperCase() + v.slice( 1 ),
@@ -46,6 +49,42 @@ function TextSetting( { value, onCommit, placeholder, maxLength = 80 } ) {
             onBlur={commit}
             onKeyDown={( e ) => e.key === 'Enter' && commit()}
         />
+    );
+}
+
+function ClockCitySetting( { value, onChange } ) {
+    const [draft, setDraft] = useState( value ? clockCity( value ) : '' );
+    const hasMatchingZone = CLOCK_TIME_ZONES.some( ( zone ) =>
+        zone.toLowerCase() === draft.trim().toLowerCase() || clockCity( zone ).toLowerCase() === draft.trim().toLowerCase()
+    );
+
+    useEffect( () => setDraft( value ? clockCity( value ) : '' ), [value] );
+
+    const onInput = ( input ) => {
+        setDraft( input );
+        const query = input.trim().toLowerCase();
+        const zone = CLOCK_TIME_ZONES.find( ( item ) => item.toLowerCase() === query || clockCity( item ).toLowerCase() === query );
+        if ( zone) onChange( zone );
+        else if ( !query ) onChange( '' );
+    };
+
+    return (
+        <label className="mt-2 block">
+            <span className="ctl-label">Second clock city or time zone</span>
+            <input
+                className="field mt-1"
+                list="clock-screen-time-zones"
+                value={draft}
+                placeholder="e.g. Tokyo or Asia/Tokyo"
+                onChange={( e ) => onInput( e.target.value )}
+            />
+            <datalist id="clock-screen-time-zones">
+                {CLOCK_TIME_ZONES.map( ( zone ) => <option key={zone} value={zone} label={clockCity( zone )} /> )}
+            </datalist>
+            <span className="hint mt-1 block">
+                {draft && !hasMatchingZone ? 'Choose a suggested city or enter its time zone.' : 'Choose a city to show its local time and date.'}
+            </span>
+        </label>
     );
 }
 
@@ -526,17 +565,6 @@ export default function StudioDrawer() {
                     title="Clock Screen"
                     collapsible
                     summary={s.idleEnabled ? CLOCK_STYLES.find( ( c ) => c.value === s.clockStyle )?.label : 'Off'}
-                    action={
-                        <button
-                            className="btn h-7"
-                            onClick={() => {
-                                setDrawerOpen( false );
-                                window.dispatchEvent( new Event( PREVIEW_IDLE_EVENT ) );
-                            }}
-                        >
-                            <Eye size={14} /> Preview
-                        </button>
-                    }
                 >
                     <p className="hint mb-2 mt-0">A full-screen clock with your daily quote appears when you stop using the page.</p>
                     <Toggle label="Show When Idle" checked={s.idleEnabled} onChange={( idleEnabled ) => update( { idleEnabled } )} />
@@ -560,7 +588,20 @@ export default function StudioDrawer() {
                             </button>
                         ) )}
                     </div>
+                    {s.clockStyle === 'dual' && (
+                        <ClockCitySetting value={s.clockTimeZone} onChange={( clockTimeZone ) => update( { clockTimeZone } )} />
+                    )}
                     <Toggle label="24-Hour Time" checked={s.clock24h} onChange={( clock24h ) => update( { clock24h } )} />
+                    <button
+                        type="button"
+                        className="btn mt-3 w-full"
+                        onClick={() => {
+                            setDrawerOpen( false );
+                            window.dispatchEvent( new Event( PREVIEW_IDLE_EVENT ) );
+                        }}
+                    >
+                        <Eye size={14} /> Preview Clock
+                    </button>
                 </Section>
 
                 <Section

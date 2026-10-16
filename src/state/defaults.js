@@ -52,6 +52,7 @@ export const DEFAULT_SETTINGS = {
   idleDelay: 60,
   clockStyle: 'classic',
   clock24h: false,
+  clockTimeZone: '',
   userName: '',
   layoutOrder: {},
   widgetSizes: {},
