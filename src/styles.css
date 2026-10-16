@@ -1182,6 +1182,12 @@ body:has(.idle-overlay) .roam-buddy {
   fill: #0b2540;
 }
 
+.rb-leg path,
+.rb-leg ellipse,
+.rb-arm {
+  filter: drop-shadow(0 0 1px rgb(255 255 255 / 0.9));
+}
+
 .roam-buddy.walking .rb-leg-l {
   animation: rb-step 0.36s ease-in-out infinite alternate;
 }

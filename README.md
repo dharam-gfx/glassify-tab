@@ -12,6 +12,10 @@ A customizable Chrome new-tab extension inspired by iOS and visionOS. Glassify T
 
 ![Glassify Studio layout presets and customization panel](docs/screenshots/studio.png)
 
+### Theme & Wallpaper
+
+![Glassify Studio wallpaper controls with Vivid, Soft, Dark, Pattern, and Photo categories and wallpaper previews](docs/screenshots/theme-wallpaper.png)
+
 ### Layout Gallery
 
 | Bento | Fluid Grid |

@@ -3,6 +3,7 @@ import { storage } from '../state/storage';
 
 const KEY = 'hydration';
 const SYNC_EVENT = 'glassify:hydration';
+export const PREVIEW_BUDDY_EVENT = 'glassify:preview-hydration-buddy';
 const MINUTE = 60_000;
 
 export const INTERVALS = [15, 30, 40, 60];

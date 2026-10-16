@@ -1,4 +1,4 @@
-import { Droplet, Settings2, Timer, Undo2, Volume2, VolumeX, X } from 'lucide-react';
+import { Droplet, Eye, Settings2, Timer, Undo2, Volume2, VolumeX, X } from 'lucide-react';
 import { useEffect, useId, useState } from 'react';
 import {
   BUDDY_TARGETS,
@@ -13,6 +13,7 @@ import {
   nextDrinkAt,
   playDrop,
   playGulp,
+  PREVIEW_BUDDY_EVENT,
   setRoamEverywhere,
   shouldAlert,
   today,
@@ -206,6 +207,14 @@ export default function HydrationWidget({ span = 'span-2x2' }) {
 
   const actions = (
     <span className="hydra-head-actions">
+      <button
+        className="hydra-icon-btn"
+        onClick={() => window.dispatchEvent(new Event(PREVIEW_BUDDY_EVENT))}
+        aria-label="Preview hydration buddy"
+        title="Preview hydration buddy"
+      >
+        <Eye size={14} />
+      </button>
       {!settingsOpen && <CountdownPill s={state} now={now} />}
       <button
         className="hydra-icon-btn"

@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { BUDDY_TARGETS, isThirsty, useHydration, useNow } from '../lib/hydration';
+import { BUDDY_TARGETS, isThirsty, PREVIEW_BUDDY_EVENT, useHydration, useNow } from '../lib/hydration';
 import { useStore } from '../state/store';
 
 const W = 72;
@@ -109,7 +109,8 @@ export default function HydrationBuddy() {
   const now = useNow(10_000);
   const enabled = settings.layoutWidgets[settings.preset]?.includes('hydration');
   const due = !!state && enabled && isThirsty(state, now);
-  const thirsty = due && state.roam && !editMode;
+  const [preview, setPreview] = useState(false);
+  const thirsty = (due && state.roam && !editMode) || preview;
   const justDrank = !!state && Date.now() - state.lastDrink < 5000;
   useTabAlert(due);
 
@@ -122,6 +123,20 @@ export default function HydrationBuddy() {
   const targetKey = state?.buddyTarget;
   const target = BUDDY_TARGETS.find((item) => item.value === state?.buddyTarget)?.label;
   const userName = settings.userName.trim();
+
+  useEffect(() => {
+    let timer;
+    const showPreview = () => {
+      clearTimeout(timer);
+      setPreview(true);
+      timer = setTimeout(() => setPreview(false), 16_000);
+    };
+    window.addEventListener(PREVIEW_BUDDY_EVENT, showPreview);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener(PREVIEW_BUDDY_EVENT, showPreview);
+    };
+  }, []);
 
   useEffect(() => {
     if (thirsty) setPhase('roaming');
@@ -145,7 +160,15 @@ export default function HydrationBuddy() {
       if (phase === 'hidden') posRef.current = null;
       return;
     }
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (preview) {
+      const spot = { x: (window.innerWidth - W) / 2, y: window.innerHeight - H - 24 };
+      posRef.current = spot;
+      setPos({ ...spot, dur: 0, flip: false });
+      setWalking(false);
+      setLine(pickLine(targetKey, userName));
+      if (reducedMotion) return;
+    } else if (reducedMotion) {
       setPos({ x: window.innerWidth - W - 24, y: window.innerHeight - H - 24, dur: 0, flip: false });
       setLine(pickLine(targetKey, userName));
       return;
@@ -169,9 +192,9 @@ export default function HydrationBuddy() {
         timer = setTimeout(step, 2200 + Math.random() * 2200);
       }, dur * 1000);
     };
-    timer = setTimeout(step, 400);
+    timer = setTimeout(step, preview ? 1800 : 400);
     return () => clearTimeout(timer);
-  }, [phase, target, targetKey, userName]);
+  }, [phase, preview, target, targetKey, userName]);
 
   useLayoutEffect(() => {
     const bubble = bubbleRef.current;
