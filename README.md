@@ -176,6 +176,8 @@ Backups are not a complete copy of extension storage. They do not include GitHub
 
 ## Data and Permissions
 
+See the [Privacy Policy](docs/privacy-policy.md) for details about stored data, optional permissions, and third-party service requests.
+
 Dashboard settings and shortcut tiles use `chrome.storage.sync`; synchronization depends on your Chrome profile and sync configuration. Custom images, GitHub credentials, and other local widget data use local storage. Startup caches also use localStorage to reduce visual flashing while the dashboard loads.
 
 The extension declares the following permissions in [public/manifest.json](public/manifest.json):

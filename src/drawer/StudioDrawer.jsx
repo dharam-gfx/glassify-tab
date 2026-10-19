@@ -673,6 +673,16 @@ export default function StudioDrawer() {
                     )}
                 </Section>
 
+                <Section title="Privacy & Data" collapsible summary="Storage, permissions, and connections">
+                    <div className="privacy-points">
+                        <p><strong>Chrome Sync</strong><span>Preferences, Spaces, and shortcut links sync through your Chrome account.</span></p>
+                        <p><strong>On this device</strong><span>Notes, tasks, reminder data, uploaded images, and GitHub tokens stay in local browser storage.</span></p>
+                        <p><strong>Connected services</strong><span>Search, weather, feeds, icons, and optional developer widgets contact their providers when used. Glassify does not run analytics.</span></p>
+                        <p><strong>Browser data</strong><span>Most Visited, Recently Closed, and Browser Boost use Chrome tab data when those widgets are enabled.</span></p>
+                        <p><strong>Website access</strong><span>The roaming buddy is off by default. If enabled, it reads reminder settings and your display name, not page content.</span></p>
+                    </div>
+                </Section>
+
                 <Section title="Backup" collapsible>
                     <div className="grid grid-cols-2 gap-2">
                         <button className="btn" onClick={exportBackup}>
