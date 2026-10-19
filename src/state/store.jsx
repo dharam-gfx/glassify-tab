@@ -1,6 +1,13 @@
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useState } from 'react';
-import { DEFAULT_SETTINGS, DEFAULT_TILES, sanitizeBg } from './defaults';
-import { WALLPAPER_KEY, iconKey, readBoot, saveImage, storage, writeBoot, writeLocal } from './storage';
+import {
+  DEFAULT_SETTINGS,
+  DEFAULT_TILES,
+  DEFAULT_SPACE_PRESETS,
+  STARTER_SPACE_TILES,
+  STARTER_SPACE_TILE_VERSION,
+  sanitizeBg,
+} from './defaults';
+import { WALLPAPER_KEY, iconKey, loadImage, readBoot, saveImage, storage, writeBoot, writeLocal } from './storage';
 import { fontAssets } from '../lib/fonts';
 
 const FONT_BOOT_KEY = 'glassify:fontBoot';
@@ -91,9 +98,138 @@ function addIntroducedWidgets(layoutWidgets, saved) {
   return layoutWidgets;
 }
 
+const spaceTilesKey = (id) => id === 'home' ? 'tiles' : `spaceTiles:${id}`;
+
+function normalizeSpaceConfig(space, fallback) {
+  const preset = DEFAULT_SPACE_PRESETS.find((item) => item.id === space.templateId)
+    ?? DEFAULT_SPACE_PRESETS.find((item) => item.name.toLowerCase() === space.name?.trim().toLowerCase());
+  return {
+    layoutWidgets: space.layoutWidgets ? sanitizeLayoutWidgets(space.layoutWidgets) : fallback.layoutWidgets,
+    layoutOrder: space.layoutOrder && typeof space.layoutOrder === 'object' ? space.layoutOrder : fallback.layoutOrder,
+    widgetSizes: space.widgetSizes && typeof space.widgetSizes === 'object' ? space.widgetSizes : fallback.widgetSizes,
+    ...(preset && {
+      templateId: preset.id,
+      templateTileVersion: Number.isInteger(space.templateTileVersion) ? space.templateTileVersion : 1,
+    }),
+  };
+}
+
+function normalizeSpaces(savedSpaces, legacyConfig, seedPresets) {
+  const emptyConfig = {
+    layoutWidgets: Object.fromEntries(Object.keys(DEFAULT_SETTINGS.layoutWidgets).map((layout) => [layout, []])),
+    layoutOrder: {},
+    widgetSizes: {},
+  };
+  const seen = new Set();
+  const spaces = (Array.isArray(savedSpaces) ? savedSpaces : []).flatMap((space) => {
+    const id = typeof space?.id === 'string' ? space.id : '';
+    const name = typeof space?.name === 'string' ? space.name.trim().slice(0, 24) : '';
+    if (!/^[a-z0-9-]{1,40}$/i.test(id) || !name || seen.has(id)) return [];
+    seen.add(id);
+    const fallback = id === 'home' ? legacyConfig : emptyConfig;
+    return [{ id, name: id === 'home' ? 'Home' : name, ...normalizeSpaceConfig(space, fallback) }];
+  });
+  if (!seen.has('home')) spaces.unshift({ id: 'home', name: 'Home', ...legacyConfig });
+  if (seedPresets) {
+    for (const preset of DEFAULT_SPACE_PRESETS) {
+      if (spaces.some((space) => space.id === preset.id || space.name.toLowerCase() === preset.name.toLowerCase())) continue;
+      const layoutWidgets = Object.fromEntries(Object.keys(DEFAULT_SETTINGS.layoutWidgets).map((layout) => [
+        layout,
+        [...preset.widgetIds],
+      ]));
+      spaces.push({
+        id: preset.id,
+        name: preset.name,
+        templateId: preset.id,
+        templateTileVersion: STARTER_SPACE_TILE_VERSION,
+        layoutWidgets,
+        layoutOrder: {},
+        widgetSizes: {},
+      });
+    }
+  }
+  return spaces;
+}
+
+function updateActiveSpaceSettings(settings, patch) {
+  const next = { ...settings, ...patch };
+  const activeConfig = {
+    layoutWidgets: next.layoutWidgets,
+    layoutOrder: next.layoutOrder,
+    widgetSizes: next.widgetSizes,
+  };
+  return {
+    ...next,
+    spaces: next.spaces.map((space) => space.id === next.activeSpaceId ? { ...space, ...activeConfig } : space),
+  };
+}
+
 function mergeSettings(saved) {
   const layoutWidgets = addIntroducedWidgets(sanitizeLayoutWidgets(saved?.layoutWidgets), saved);
-  return { ...DEFAULT_SETTINGS, ...saved, layoutWidgets, widgetsIntroduced: DEFAULT_SETTINGS.widgetsIntroduced };
+  const legacyConfig = {
+    layoutWidgets,
+    layoutOrder: saved?.layoutOrder ?? {},
+    widgetSizes: saved?.widgetSizes ?? {},
+  };
+  const spaces = normalizeSpaces(saved?.spaces, legacyConfig, saved?.starterSpacesVersion !== 1);
+  const activeSpaceId = spaces.some((space) => space.id === saved?.activeSpaceId) ? saved.activeSpaceId : 'home';
+  const activeSpace = spaces.find((space) => space.id === activeSpaceId);
+  const persistedSettings = { ...saved };
+  delete persistedSettings.id;
+  delete persistedSettings.name;
+  delete persistedSettings.templateId;
+  return {
+    ...DEFAULT_SETTINGS,
+    ...persistedSettings,
+    layoutWidgets: activeSpace.layoutWidgets,
+    layoutOrder: activeSpace.layoutOrder,
+    widgetSizes: activeSpace.widgetSizes,
+    spaces,
+    activeSpaceId,
+    starterSpacesVersion: 1,
+    widgetsIntroduced: DEFAULT_SETTINGS.widgetsIntroduced,
+  };
+}
+
+function createPresetTiles(templateId) {
+  const preset = DEFAULT_SPACE_PRESETS.find((item) => item.id === templateId);
+  if (!preset) return [];
+  return STARTER_SPACE_TILES.filter((tile) => preset.tileIds.includes(tile.id)).map((tile) => ({
+    ...tile,
+    id: crypto.randomUUID().slice(0, 8),
+  }));
+}
+
+function addPresetTileUpdates(templateId, tiles) {
+  const preset = DEFAULT_SPACE_PRESETS.find((item) => item.id === templateId);
+  if (!preset) return tiles;
+  const existingUrls = new Set(tiles.map((tile) => tile.url));
+  const additions = STARTER_SPACE_TILES
+    .filter((tile) => preset.addedTileIds.includes(tile.id) && !existingUrls.has(tile.url))
+    .map((tile) => ({ ...tile, id: crypto.randomUUID().slice(0, 8) }));
+  return [...tiles, ...additions];
+}
+
+function markPresetTileVersion(settings) {
+  return {
+    ...settings,
+    spaces: settings.spaces.map((space) => space.templateId
+      ? { ...space, templateTileVersion: STARTER_SPACE_TILE_VERSION }
+      : space),
+  };
+}
+
+function sanitizeBackupTiles(tiles) {
+  return (Array.isArray(tiles) ? tiles : [])
+    .map((tile) => ({
+      id: String(tile?.id ?? crypto.randomUUID().slice(0, 8)).slice(0, 16),
+      title: String(tile?.title ?? '').slice(0, 40),
+      url: normalizeUrl(tile?.url),
+      ...(tile?.group && { group: String(tile.group).slice(0, 30) }),
+      ...((tile?.openIn === 'same' || tile?.openIn === 'new') && { openIn: tile.openIn }),
+      ...(sanitizeBg(tile?.bg) && { bg: tile.bg }),
+    }))
+    .filter((tile) => tile.url);
 }
 
 export function StoreProvider({ children }) {
@@ -107,16 +243,43 @@ export function StoreProvider({ children }) {
 
   // chrome.storage.sync stays the source of truth (it syncs across devices); only re-render if it differs.
   useEffect(() => {
-    storage.get('sync', ['settings', 'tiles']).then((saved) => {
-      const nextSettings = mergeSettings(saved.settings);
-      const nextTiles = Array.isArray(saved.tiles) ? saved.tiles : DEFAULT_TILES;
+    let live = true;
+    storage.get('sync', ['settings', 'tiles']).then(async (saved) => {
+      const loadedSettings = mergeSettings(saved.settings);
+      const tileSets = await Promise.all(loadedSettings.spaces.map(async (space) => {
+        const key = spaceTilesKey(space.id);
+        const spaceSaved = key === 'tiles' ? saved : await storage.get('sync', [key]);
+        if (Array.isArray(spaceSaved[key])) {
+          const savedTiles = space.templateId && space.templateTileVersion < STARTER_SPACE_TILE_VERSION
+            ? addPresetTileUpdates(space.templateId, spaceSaved[key])
+            : spaceSaved[key];
+          if (savedTiles !== spaceSaved[key]) await storage.set('sync', { [key]: savedTiles });
+          return { key, tiles: savedTiles };
+        }
+        let fallbackTiles = [];
+        if (space.templateId) fallbackTiles = createPresetTiles(space.templateId);
+        else if (space.id === 'home') fallbackTiles = DEFAULT_TILES;
+        await storage.set('sync', { [key]: fallbackTiles });
+        return { key, tiles: fallbackTiles };
+      }));
+      const nextSettings = markPresetTileVersion(loadedSettings);
+      const nextTiles = tileSets.find((set) => set.key === spaceTilesKey(nextSettings.activeSpaceId))?.tiles ?? [];
+      if (!live) return;
       setSettings((cur) => (JSON.stringify(cur) === JSON.stringify(nextSettings) ? cur : nextSettings));
       setTiles((cur) => (JSON.stringify(cur) === JSON.stringify(nextTiles) ? cur : nextTiles));
-    });
+    }).catch((err) => console.warn('Could not load spaces:', err));
+    return () => { live = false; };
   }, []);
 
   usePersist('settings', settings);
-  usePersist('tiles', tiles);
+  const currentTilesKey = spaceTilesKey(settings?.activeSpaceId ?? 'home');
+  useEffect(() => {
+    if (tiles == null) return;
+    const timer = setTimeout(() => {
+      storage.set('sync', { [currentTilesKey]: tiles }).catch((err) => console.warn('Could not save tiles:', err));
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [currentTilesKey, tiles]);
 
   useEffect(() => {
     if (settings && tiles) writeBoot({ settings, tiles });
@@ -151,13 +314,139 @@ export function StoreProvider({ children }) {
 
   const update = useCallback((patch) => setSettings((s) => ({ ...s, ...patch })), []);
 
+  const switchSpace = useCallback(async (id) => {
+    if (id === settings.activeSpaceId || !settings.spaces.some((space) => space.id === id)) return;
+    await storage.set('sync', { [spaceTilesKey(settings.activeSpaceId)]: tiles ?? [] });
+    const key = spaceTilesKey(id);
+    const saved = await storage.get('sync', [key]);
+    const fallbackTiles = id === 'home' ? DEFAULT_TILES : [];
+    const nextTiles = Array.isArray(saved[key]) ? saved[key] : fallbackTiles;
+    setSettings((current) => {
+      const spaces = current.spaces.map((space) => space.id === current.activeSpaceId
+        ? { ...space, layoutWidgets: current.layoutWidgets, layoutOrder: current.layoutOrder, widgetSizes: current.widgetSizes }
+        : space);
+      const nextSpace = spaces.find((space) => space.id === id);
+      return {
+        ...current,
+        layoutWidgets: nextSpace.layoutWidgets,
+        layoutOrder: nextSpace.layoutOrder,
+        widgetSizes: nextSpace.widgetSizes,
+        spaces,
+        activeSpaceId: id,
+      };
+    });
+    setTiles(nextTiles);
+    setDrawerOpen(false);
+    setEditor(null);
+    setEditMode(false);
+  }, [settings, tiles]);
+
+  const renameSpace = useCallback((id, name) => {
+    const cleanName = name.trim().slice(0, 24);
+    if (!cleanName || settings.spaces.some((space) => space.id !== id && space.name.toLowerCase() === cleanName.toLowerCase())) return false;
+    setSettings((current) => ({
+      ...current,
+      spaces: current.spaces.map((space) => space.id === id ? { ...space, name: cleanName } : space),
+    }));
+    return true;
+  }, [settings]);
+
+  const createSpace = useCallback(async (name) => {
+    const cleanName = name.trim().slice(0, 24);
+    if (!cleanName || settings.spaces.some((space) => space.name.toLowerCase() === cleanName.toLowerCase())) return false;
+    const id = `space-${crypto.randomUUID().slice(0, 8)}`;
+    const idMap = new Map();
+    const nextTiles = await Promise.all((tiles ?? []).map(async (tile) => {
+      const tileId = crypto.randomUUID().slice(0, 8);
+      idMap.set(tile.id, tileId);
+      if (tile.customIcon) {
+        const image = await loadImage(iconKey(tile.id));
+        if (image) await saveImage(iconKey(tileId), image);
+      }
+      return { ...tile, id: tileId };
+    }));
+    const newSpace = {
+      id,
+      name: cleanName,
+      layoutWidgets: settings.layoutWidgets,
+      layoutOrder: Object.fromEntries(Object.entries(settings.layoutOrder).map(([layout, order]) => [
+        layout,
+        Array.isArray(order) ? order.map((item) => idMap.get(item) ?? item) : order,
+      ])),
+      widgetSizes: settings.widgetSizes,
+    };
+    await storage.set('sync', { [spaceTilesKey(id)]: nextTiles });
+    setSettings((current) => {
+      const spaces = current.spaces.map((space) => space.id === current.activeSpaceId
+        ? { ...space, layoutWidgets: current.layoutWidgets, layoutOrder: current.layoutOrder, widgetSizes: current.widgetSizes }
+        : space);
+      return {
+        ...current,
+        layoutWidgets: newSpace.layoutWidgets,
+        layoutOrder: newSpace.layoutOrder,
+        widgetSizes: newSpace.widgetSizes,
+        spaces: [...spaces, newSpace],
+        activeSpaceId: id,
+      };
+    });
+    setTiles(nextTiles);
+    setEditor(null);
+    setEditMode(false);
+    return true;
+  }, [settings, tiles]);
+
+  const deleteSpace = useCallback(async (id) => {
+    if (id === 'home' || !settings.spaces.some((space) => space.id === id)) return;
+    const key = spaceTilesKey(id);
+    const saved = id === settings.activeSpaceId ? null : await storage.get('sync', [key]);
+    const deletedTiles = id === settings.activeSpaceId ? tiles : saved[key];
+    await Promise.all((deletedTiles ?? []).filter((tile) => tile.customIcon).map((tile) => saveImage(iconKey(tile.id), null)));
+    await storage.remove('sync', [key]);
+    if (id !== settings.activeSpaceId) {
+      setSettings((current) => ({ ...current, spaces: current.spaces.filter((space) => space.id !== id) }));
+      return;
+    }
+    const home = settings.spaces.find((space) => space.id === 'home');
+    const homeTiles = await storage.get('sync', ['tiles']);
+    setSettings((current) => {
+      const spaces = current.spaces
+        .filter((space) => space.id !== id)
+        .map((space) => space.id === current.activeSpaceId
+          ? { ...space, layoutWidgets: current.layoutWidgets, layoutOrder: current.layoutOrder, widgetSizes: current.widgetSizes }
+          : space);
+      return {
+        ...current,
+        layoutWidgets: home.layoutWidgets,
+        layoutOrder: home.layoutOrder,
+        widgetSizes: home.widgetSizes,
+        spaces,
+        activeSpaceId: 'home',
+      };
+    });
+    setTiles(Array.isArray(homeTiles.tiles) ? homeTiles.tiles : DEFAULT_TILES);
+    setEditMode(false);
+  }, [settings, tiles]);
+
   // Switching layouts only changes which layout renders; it leaves the user's spacing/style sliders alone.
   const applyPreset = useCallback((preset) => setSettings((s) => ({ ...s, preset })), []);
 
-  const resetSettings = useCallback(() => setSettings({ ...DEFAULT_SETTINGS }), []);
+  const resetSettings = useCallback(() => setSettings((s) => {
+    const resetConfig = {
+      layoutWidgets: DEFAULT_SETTINGS.layoutWidgets,
+      layoutOrder: {},
+      widgetSizes: {},
+    };
+    const spaces = s.spaces.map((space) => space.id === s.activeSpaceId ? { ...space, ...resetConfig } : space);
+    return {
+      ...DEFAULT_SETTINGS,
+      ...resetConfig,
+      spaces,
+      activeSpaceId: s.activeSpaceId,
+    };
+  }), []);
 
   // Only accept known keys of matching type, and tiles with safe http(s) URLs.
-  const importBackup = useCallback((data) => {
+  const importBackup = useCallback(async (data) => {
     if (!data || typeof data !== 'object') throw new Error('Not a Glassify backup file.');
     const next = { ...DEFAULT_SETTINGS };
     for (const [key, def] of Object.entries(DEFAULT_SETTINGS)) {
@@ -170,20 +459,31 @@ export function StoreProvider({ children }) {
         if (Array.isArray(ids)) next.layoutWidgets[layout] = ids.filter((id) => WIDGET_IDS.includes(id));
       }
     }
-    const tilesIn = Array.isArray(data.tiles) ? data.tiles : [];
-    const cleanTiles = tilesIn
-      .map((t) => ({
-        id: String(t?.id ?? crypto.randomUUID().slice(0, 8)).slice(0, 16),
-        title: String(t?.title ?? '').slice(0, 40),
-        url: normalizeUrl(t?.url),
-        ...(t?.group && { group: String(t.group).slice(0, 30) }),
-        ...((t?.openIn === 'same' || t?.openIn === 'new') && { openIn: t.openIn }),
-        ...(sanitizeBg(t?.bg) && { bg: t.bg }),
-      }))
-      .filter((t) => t.url);
-    if (!cleanTiles.length) throw new Error('Backup contains no valid tiles.');
-    setSettings(next);
-    setTiles(cleanTiles);
+    if (!Array.isArray(data.spaces)) {
+      next.spaces = [];
+      next.activeSpaceId = 'home';
+      next.starterSpacesVersion = 0;
+    }
+    const mergedSettings = mergeSettings(next);
+    const importedSpaces = Array.isArray(data.spaces) ? data.spaces : null;
+    const tileSets = mergedSettings.spaces.map((space) => {
+      const imported = importedSpaces?.find((item) => item.id === space.id);
+      let spaceTiles;
+      if (Array.isArray(imported?.tiles)) spaceTiles = sanitizeBackupTiles(imported.tiles);
+      else if (space.id === mergedSettings.activeSpaceId) spaceTiles = sanitizeBackupTiles(data.tiles);
+      else if (space.templateId) spaceTiles = createPresetTiles(space.templateId);
+      else spaceTiles = [];
+      if (space.templateId && space.templateTileVersion < STARTER_SPACE_TILE_VERSION) {
+        spaceTiles = addPresetTileUpdates(space.templateId, spaceTiles);
+      }
+      return { key: spaceTilesKey(space.id), tiles: spaceTiles };
+    });
+    const nextSettings = markPresetTileVersion(mergedSettings);
+    const activeTiles = tileSets.find((set) => set.key === spaceTilesKey(nextSettings.activeSpaceId))?.tiles ?? [];
+    if (!importedSpaces && !activeTiles.length) throw new Error('Backup contains no valid tiles.');
+    await Promise.all(tileSets.map((set) => storage.set('sync', { [set.key]: set.tiles })));
+    setSettings(nextSettings);
+    setTiles(activeTiles);
   }, []);
 
   const setCustomWallpaper = useCallback(async (dataUrl) => {
@@ -277,27 +577,26 @@ export function StoreProvider({ children }) {
       const order = s.layoutOrder?.mosaic;
       if (!Array.isArray(order)) return s;
       const renamed = order.map((id) => (id === `group:${from}` ? `group:${name}` : id));
-      return { ...s, layoutOrder: { ...s.layoutOrder, mosaic: renamed } };
+      return updateActiveSpaceSettings(s, { layoutOrder: { ...s.layoutOrder, mosaic: renamed } });
     });
   }, []);
 
   const moveWidget = useCallback((layout, ids, fromId, toId) => {
     const next = ids.filter((id) => id !== fromId);
     next.splice(next.indexOf(toId), 0, fromId);
-    setSettings((s) => ({ ...s, layoutOrder: { ...s.layoutOrder, [layout]: next } }));
+    setSettings((s) => updateActiveSpaceSettings(s, { layoutOrder: { ...s.layoutOrder, [layout]: next } }));
   }, []);
 
   const addWidget = useCallback((layout, id) => {
     setSettings((s) => {
       const current = s.layoutWidgets[layout] ?? [];
       if (current.includes(id)) return s;
-      return { ...s, layoutWidgets: { ...s.layoutWidgets, [layout]: [...current, id] } };
+      return updateActiveSpaceSettings(s, { layoutWidgets: { ...s.layoutWidgets, [layout]: [...current, id] } });
     });
   }, []);
 
   const removeWidget = useCallback((layout, id) => {
-    setSettings((s) => ({
-      ...s,
+    setSettings((s) => updateActiveSpaceSettings(s, {
       layoutWidgets: { ...s.layoutWidgets, [layout]: (s.layoutWidgets[layout] ?? []).filter((w) => w !== id) },
       layoutOrder: { ...s.layoutOrder, [layout]: (s.layoutOrder[layout] ?? []).filter((w) => w !== id) },
     }));
@@ -312,7 +611,7 @@ export function StoreProvider({ children }) {
       const forLayout = { ...s.widgetSizes?.[layout] };
       if (size) forLayout[id] = size;
       else delete forLayout[id];
-      return { ...s, widgetSizes: { ...s.widgetSizes, [layout]: forLayout } };
+      return updateActiveSpaceSettings(s, { widgetSizes: { ...s.widgetSizes, [layout]: forLayout } });
     });
   }, []);
 
@@ -330,6 +629,10 @@ export function StoreProvider({ children }) {
       resetSettings,
       importBackup,
       setCustomWallpaper,
+      switchSpace,
+      renameSpace,
+      createSpace,
+      deleteSpace,
       addTile,
       updateTile,
       removeTile,
@@ -352,6 +655,7 @@ export function StoreProvider({ children }) {
       closeEditor,
     }),
     [settings, tiles, drawerOpen, editor, editMode, gridCols, update, applyPreset, resetSettings, importBackup, setCustomWallpaper,
+      switchSpace, renameSpace, createSpace, deleteSpace,
         addTile, updateTile, removeTile, moveTile, setTileGridPosition, autoAdjustLayout, setTileGroup, renameGroup, moveWidget, addWidget, removeWidget, setWidgetSize, openEditor, closeEditor]
   );
 

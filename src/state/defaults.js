@@ -57,6 +57,9 @@ export const DEFAULT_SETTINGS = {
   userName: '',
   layoutOrder: {},
   widgetSizes: {},
+  activeSpaceId: 'home',
+  spaces: [],
+  starterSpacesVersion: 1,
   maxWidth: 1280,
   layoutWidgets: {
     bento: ['weather', 'calendar', 'tasks', 'boost', 'hydration'],
@@ -87,6 +90,77 @@ export const DEFAULT_TILES = [
   tile( 'drive', 'Drive', 'https://drive.google.com/' ),
   tile( 'spotify', 'Spotify', 'https://open.spotify.com/' ),
   tile( 'trello', 'Trello', 'https://trello.com/' ),
+];
+
+export const SPACE_EXTRA_TILES = [
+  tile( 'google-calendar', 'Google Calendar', 'https://calendar.google.com/' ),
+  tile( 'outlook', 'Outlook', 'https://outlook.office.com/' ),
+  tile( 'teams', 'Microsoft Teams', 'https://teams.microsoft.com/' ),
+  tile( 'zoom', 'Zoom', 'https://zoom.us/' ),
+  tile( 'jira', 'Jira', 'https://www.atlassian.com/software/jira' ),
+  tile( 'asana', 'Asana', 'https://app.asana.com/' ),
+  tile( 'confluence', 'Confluence', 'https://www.atlassian.com/software/confluence' ),
+  tile( 'google-classroom', 'Google Classroom', 'https://classroom.google.com/' ),
+  tile( 'google-scholar', 'Google Scholar', 'https://scholar.google.com/' ),
+  tile( 'coursera', 'Coursera', 'https://www.coursera.org/' ),
+  tile( 'khan-academy', 'Khan Academy', 'https://www.khanacademy.org/' ),
+  tile( 'quizlet', 'Quizlet', 'https://quizlet.com/' ),
+  tile( 'wikipedia', 'Wikipedia', 'https://www.wikipedia.org/' ),
+  tile( 'chatgpt', 'ChatGPT', 'https://chatgpt.com/' ),
+  tile( 'canva', 'Canva', 'https://www.canva.com/' ),
+  tile( 'behance', 'Behance', 'https://www.behance.net/' ),
+  tile( 'dribbble', 'Dribbble', 'https://dribbble.com/' ),
+  tile( 'pinterest', 'Pinterest', 'https://www.pinterest.com/' ),
+  tile( 'unsplash', 'Unsplash', 'https://unsplash.com/' ),
+  tile( 'coolors', 'Coolors', 'https://coolors.co/' ),
+  tile( 'adobe-express', 'Adobe Express', 'https://express.adobe.com/' ),
+  tile( 'stackoverflow', 'Stack Overflow', 'https://stackoverflow.com/' ),
+  tile( 'mdn', 'MDN Web Docs', 'https://developer.mozilla.org/' ),
+  tile( 'npmjs', 'npm', 'https://www.npmjs.com/' ),
+  tile( 'gitlab', 'GitLab', 'https://gitlab.com/' ),
+  tile( 'vercel', 'Vercel', 'https://vercel.com/' ),
+  tile( 'codepen', 'CodePen', 'https://codepen.io/' ),
+  tile( 'postman', 'Postman', 'https://www.postman.com/' ),
+  tile( 'dockerhub', 'Docker Hub', 'https://hub.docker.com/' ),
+  tile( 'replit', 'Replit', 'https://replit.com/' ),
+];
+
+export const STARTER_SPACE_TILES = [...DEFAULT_TILES, ...SPACE_EXTRA_TILES];
+export const STARTER_SPACE_TILE_VERSION = 3;
+
+export const DEFAULT_SPACE_PRESETS = [
+  {
+    id: 'work',
+    name: 'Work',
+    tileIds: ['google', 'gmail', 'slack', 'notion', 'trello', 'drive', 'github', 'google-calendar', 'outlook', 'teams', 'zoom', 'jira', 'asana', 'confluence'],
+    previousTileIds: ['google', 'gmail', 'slack', 'notion', 'trello', 'drive', 'github'],
+    addedTileIds: ['google-calendar', 'outlook', 'teams', 'zoom', 'jira', 'asana', 'confluence'],
+    widgetIds: ['calendar', 'tasks', 'focus', 'notes', 'progress', 'eyeBreak'],
+  },
+  {
+    id: 'study',
+    name: 'Study',
+    tileIds: ['google', 'youtube', 'notion', 'gmail', 'drive', 'photos', 'google-classroom', 'google-scholar', 'coursera', 'khan-academy', 'quizlet', 'wikipedia', 'chatgpt'],
+    previousTileIds: ['google', 'youtube', 'notion', 'gmail', 'drive', 'photos'],
+    addedTileIds: ['google-classroom', 'google-scholar', 'coursera', 'khan-academy', 'quizlet', 'wikipedia', 'chatgpt'],
+    widgetIds: ['calendar', 'focus', 'notes', 'tasks', 'progress', 'eyeBreak'],
+  },
+  {
+    id: 'designer',
+    name: 'Designer',
+    tileIds: ['figma', 'photos', 'photoshop', 'drive', 'notion', 'slack', 'canva', 'behance', 'dribbble', 'pinterest', 'unsplash', 'coolors', 'adobe-express'],
+    previousTileIds: ['figma', 'photos', 'photoshop', 'drive', 'notion', 'slack'],
+    addedTileIds: ['canva', 'behance', 'dribbble', 'pinterest', 'unsplash', 'coolors', 'adobe-express'],
+    widgetIds: ['calendar', 'focus', 'notes', 'progress', 'eyeBreak'],
+  },
+  {
+    id: 'developer',
+    name: 'Developer',
+    tileIds: ['github', 'google', 'youtube', 'notion', 'gmail', 'stackoverflow', 'mdn', 'npmjs', 'gitlab', 'vercel', 'codepen', 'postman', 'dockerhub', 'replit'],
+    previousTileIds: ['github', 'google', 'youtube', 'notion', 'gmail'],
+    addedTileIds: ['stackoverflow', 'mdn', 'npmjs', 'gitlab', 'vercel', 'codepen', 'postman', 'dockerhub', 'replit'],
+    widgetIds: ['toolbox', 'ghRepos', 'prs', 'contributions', 'hn', 'status', 'npm', 'snippets', 'localhost', 'notes', 'tasks'],
+  },
 ];
 
 export const TILE_BGS = [

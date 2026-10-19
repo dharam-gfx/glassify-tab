@@ -7,7 +7,7 @@ import { useStore } from '../state/store';
 import { ColorSwatch, Section, Segmented, Slider, Toggle } from './controls';
 import GithubTokenSetting from './GithubTokenSetting';
 import PresetPreview from './PresetPreview';
-import { WALLPAPER_KEY, WP_THUMB_KEY, loadImage, writeLocal } from '../state/storage';
+import { WALLPAPER_KEY, WP_THUMB_KEY, loadImage, storage, writeLocal } from '../state/storage';
 import { WIDGET_CATALOG, WIDGET_CATEGORIES } from '../widgets/catalog';
 import { PERSONAS } from '../lib/quotes';
 import { FONTS, fontAssets } from '../lib/fonts';
@@ -140,15 +140,24 @@ export default function StudioDrawer() {
         };
     }, [s.wallpaperRev] );
 
-    const exportBackup = () => {
-        const blob = new Blob( [JSON.stringify( { app: 'glassify-tab', version: 1, settings: s, tiles }, null, 2 )], {
-            type: 'application/json',
-        } );
-        const a = document.createElement( 'a' );
-        a.href = URL.createObjectURL( blob );
-        a.download = `glassify-backup-${new Date().toISOString().slice( 0, 10 )}.json`;
-        a.click();
-        URL.revokeObjectURL( a.href );
+    const exportBackup = async () => {
+        try {
+            const spaces = await Promise.all( s.spaces.map( async ( space ) => {
+                const key = space.id === 'home' ? 'tiles' : `spaceTiles:${space.id}`;
+                const saved = space.id === s.activeSpaceId ? null : await storage.get( 'sync', [key] );
+                return { id: space.id, name: space.name, tiles: space.id === s.activeSpaceId ? tiles : saved[key] ?? [] };
+            } ) );
+            const blob = new Blob( [JSON.stringify( { app: 'glassify-tab', version: 2, settings: s, tiles, spaces }, null, 2 )], {
+                type: 'application/json',
+            } );
+            const a = document.createElement( 'a' );
+            a.href = URL.createObjectURL( blob );
+            a.download = `glassify-backup-${new Date().toISOString().slice( 0, 10 )}.json`;
+            a.click();
+            URL.revokeObjectURL( a.href );
+        } catch {
+            setBackupMsg( 'Could not export backup.' );
+        }
     };
 
     const onImport = async ( e ) => {
@@ -157,7 +166,7 @@ export default function StudioDrawer() {
         if ( !file ) return;
         try {
             if ( file.size > 512 * 1024 ) throw new Error( 'Backup file is too large.' );
-            importBackup( JSON.parse( await file.text() ) );
+            await importBackup( JSON.parse( await file.text() ) );
             setBackupMsg( 'Backup restored.' );
         } catch ( err ) {
             setBackupMsg( err instanceof SyntaxError ? 'File is not valid JSON.' : err.message );

@@ -2,6 +2,8 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 import HydrationBuddy from './components/HydrationBuddy';
 import IdleOverlay from './components/IdleOverlay';
 import QuoteBar from './components/QuoteBar';
+import BackToTop from './components/BackToTop';
+import SpaceBar from './components/SpaceBar';
 import TopBar from './components/TopBar';
 import Wallpaper from './components/Wallpaper';
 import { LAYOUTS } from './layouts';
@@ -26,11 +28,13 @@ export default function App() {
       <Wallpaper />
       <div className="app">
         <TopBar />
+        <SpaceBar />
         <main className="dash">
           <Layout />
         </main>
       </div>
       <QuoteBar />
+      <BackToTop />
       <HydrationBuddy />
       <Suspense fallback={null}>
         {studioRequested && <StudioDrawer />}

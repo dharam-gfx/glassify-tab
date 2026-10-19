@@ -8,6 +8,12 @@ A customizable Chrome new-tab extension inspired by iOS and visionOS. Glassify T
 
 ![Glassify Tab dashboard with widgets and website shortcuts](docs/screenshots/dashboard.png)
 
+### Spaces
+
+![Dashboard with Home, Work, Study, Designer, and Developer spaces and a dedicated developer widget layout](docs/screenshots/spaces.png)
+
+Use Spaces to keep separate shortcut and widget layouts for different activities. Starter spaces include Work, Study, Designer, and Developer; each can be edited, renamed, or deleted. Home remains as the protected fallback, and appearance settings are shared across spaces.
+
 ### Glassify Studio
 
 ![Glassify Studio layout presets and customization panel](docs/screenshots/studio.png)
@@ -43,6 +49,7 @@ Captured in the local web preview. Chrome-only widgets require the installed ext
 - **Flexible layouts:** Bento, Fluid Grid, Feed, and Mosaic presets, with grid and spacing controls.
 - **Personal appearance:** Built-in wallpapers, custom photo uploads, font selection, and glass-style controls through Glassify Studio.
 - **Website shortcuts:** Editable tiles with custom icons or text fallbacks, plus app groups.
+- **Spaces:** Keep separate shortcuts and widget layouts for Home, Work, Study, Designer, and Developer.
 - **Productivity tools:** Tasks, auto-saved notes, a Pomodoro timer, hydration tracking, and a local reading queue.
 - **Mindfulness:** An optional 20-20-20 eye-break reminder with a quiet 20-second rest prompt.
 - **Time and weather:** Local conditions, a calendar, world clocks, and day-progress indicators.
