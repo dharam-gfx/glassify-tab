@@ -68,9 +68,17 @@ export default function WidgetSlot({ id, layout, defaultSize = '2x2', mode = 'gr
   const displaySize = previewSize ?? size;
   const responsiveRss = id === 'rss' && gridCols <= 2;
   const effectiveContentRows = fitRows ? contentRows : 1;
+  const [, slotRows] = displaySize.split('x').map(Number);
   const placementStyle = responsiveRss
     ? { gridColumn: '1 / span 2', gridRow: 'auto' }
     : slotStyle(displaySize, mode, gridCols, effectiveContentRows);
+  if (id === 'progress' && mode === 'grid') {
+    const heightTerms = [
+      ...new Array(slotRows).fill('var(--cell-h)'),
+      ...new Array(slotRows - 1).fill('var(--gap)'),
+    ];
+    placementStyle.maxHeight = `calc(${heightTerms.join(' + ')})`;
+  }
 
   useLayoutEffect(() => {
     if (!fitRows) return;

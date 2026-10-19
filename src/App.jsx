@@ -1,15 +1,23 @@
+import { lazy, Suspense, useEffect, useState } from 'react';
 import HydrationBuddy from './components/HydrationBuddy';
 import IdleOverlay from './components/IdleOverlay';
 import QuoteBar from './components/QuoteBar';
-import TileEditorModal from './components/TileEditorModal';
 import TopBar from './components/TopBar';
 import Wallpaper from './components/Wallpaper';
-import StudioDrawer from './drawer/StudioDrawer';
 import { LAYOUTS } from './layouts';
 import { useStore } from './state/store';
 
+const TileEditorModal = lazy(() => import('./components/TileEditorModal'));
+const StudioDrawer = lazy(() => import('./drawer/StudioDrawer'));
+
 export default function App() {
-  const { ready, settings } = useStore();
+  const { ready, settings, drawerOpen, editor } = useStore();
+  const [studioRequested, setStudioRequested] = useState(false);
+
+  useEffect(() => {
+    if (drawerOpen) setStudioRequested(true);
+  }, [drawerOpen]);
+
   if (!ready) return null;
   const Layout = LAYOUTS[settings.preset] ?? LAYOUTS.bento;
 
@@ -24,8 +32,10 @@ export default function App() {
       </div>
       <QuoteBar />
       <HydrationBuddy />
-      <StudioDrawer />
-      <TileEditorModal />
+      <Suspense fallback={null}>
+        {studioRequested && <StudioDrawer />}
+        {editor && <TileEditorModal />}
+      </Suspense>
       <IdleOverlay />
     </>
   );

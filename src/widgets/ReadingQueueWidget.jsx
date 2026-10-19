@@ -13,9 +13,9 @@ const FILTERS = [
 
 function savedLabel(timestamp) {
   const days = Math.floor(Math.max(0, Date.now() - timestamp) / 86_400_000);
-  if (days === 0) return 'Saved today';
-  if (days === 1) return 'Saved yesterday';
-  return `Saved ${days}d ago`;
+  if (days === 0) return 'Today';
+  if (days === 1) return 'Yesterday';
+  return `${days}d ago`;
 }
 
 function visibleItems(queue, filter) {
@@ -91,28 +91,30 @@ function ReadingList({ items, filter, queueLength, onToggle, onRemove }) {
   }
 
   return (
-    <ul className="reading-list">
-      {items.slice(0, 20).map((item) => {
-        const isRead = !!item.readAt;
-        const domain = new URL(item.url).hostname.replace(/^www\./, '');
-        return (
-          <li className={isRead ? 'is-read' : ''} key={item.id}>
-            <div className="reading-item-copy">
-              <a href={item.url} target="_blank" rel="noopener noreferrer" onClick={() => !isRead && onToggle(item.id)}>
-                {item.title}
-              </a>
-              <span>{domain} · {savedLabel(item.addedAt)}</span>
-            </div>
-            <button className="reading-item-action" type="button" onClick={() => onToggle(item.id)} aria-label={isRead ? `Mark ${item.title} unread` : `Mark ${item.title} read`}>
-              {isRead ? <RotateCcw size={14} /> : <Check size={15} />}
-            </button>
-            <button className="reading-item-action reading-remove" type="button" onClick={() => onRemove(item.id)} aria-label={`Remove ${item.title}`}>
-              <Trash2 size={14} />
-            </button>
-          </li>
-        );
-      })}
-    </ul>
+    <section className="reading-list-scroll" aria-label="Saved articles">
+      <ul className="reading-list">
+        {items.slice(0, 20).map((item) => {
+          const isRead = !!item.readAt;
+          const domain = new URL(item.url).hostname.replace(/^www\./, '');
+          return (
+            <li className={isRead ? 'is-read' : ''} key={item.id}>
+              <div className="reading-item-copy">
+                <a href={item.url} target="_blank" rel="noopener noreferrer" onClick={() => !isRead && onToggle(item.id)}>
+                  {item.title}
+                </a>
+                <span>{domain} · {savedLabel(item.addedAt)}</span>
+              </div>
+              <button className="reading-item-action" type="button" onClick={() => onToggle(item.id)} aria-label={isRead ? `Mark ${item.title} unread` : `Mark ${item.title} read`}>
+                {isRead ? <RotateCcw size={14} /> : <Check size={15} />}
+              </button>
+              <button className="reading-item-action reading-remove" type="button" onClick={() => onRemove(item.id)} aria-label={`Remove ${item.title}`}>
+                <Trash2 size={14} />
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
 }
 
@@ -165,7 +167,7 @@ export default function ReadingQueueWidget({ span = 'span-2x2' }) {
     <button
       className="widget-icon-btn"
       type="button"
-      onClick={() => { setAdding((open) => !open); setError(''); }}
+      onClick={() => setAdding((open) => !open)}
       aria-label={adding ? 'Close add link form' : 'Add link to reading queue'}
       aria-expanded={adding}
       title={adding ? 'Close' : 'Add link'}

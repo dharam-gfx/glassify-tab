@@ -1882,6 +1882,14 @@ body:has(.idle-overlay) .roam-buddy {
   flex: 1;
 }
 
+.widget-slot:has(.reading-queue-widget) {
+  min-height: 0;
+}
+
+.widget-slot:has(.reading-queue-widget) > .reading-queue-widget {
+  min-height: 0;
+}
+
 .widget-slot.drop-target,
 .app-group.drop-target {
   box-shadow: 0 0 0 2px rgb(255 255 255 / 0.9), 0 0 24px rgb(10 132 255 / 0.6);
@@ -3840,12 +3848,32 @@ body:has(.idle-overlay) .roam-buddy {
   flex-direction: column;
 }
 
+.reading-queue-widget .widget-head {
+  min-height: 18px;
+  margin-bottom: 4px;
+}
+
+.reading-queue-widget .widget-head h3 {
+  font-size: 10px;
+  letter-spacing: 0;
+}
+
+.reading-queue-widget .dev-chip {
+  width: 18px;
+  height: 18px;
+}
+
+.reading-queue-widget .widget-head .widget-icon-btn {
+  width: 20px;
+  height: 20px;
+}
+
 .reading-summary {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 6px;
+  margin-bottom: 4px;
 }
 
 .reading-summary > div {
@@ -3868,8 +3896,8 @@ body:has(.idle-overlay) .roam-buddy {
   align-items: center;
   justify-content: center;
   gap: 5px;
-  min-height: 28px;
-  padding: 0 9px;
+  min-height: 24px;
+  padding: 0 8px;
   border: 1px solid rgb(100 210 255 / 0.28);
   border-radius: 9px;
   color: #64d2ff;
@@ -3884,12 +3912,29 @@ body:has(.idle-overlay) .roam-buddy {
   background: rgb(100 210 255 / 0.18);
 }
 
-.reading-list {
+.reading-list-scroll {
   flex: 1;
   min-height: 0;
   margin: 0 -5px;
   overflow-y: auto;
-  scrollbar-width: thin;
+  scrollbar-width: none;
+}
+
+.reading-queue-widget .chip-row {
+  gap: 2px;
+  margin-bottom: 4px;
+}
+
+.reading-queue-widget .chip {
+  height: 22px;
+}
+
+.reading-list-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.reading-list {
+  margin: 0;
 }
 
 .reading-list li {
@@ -3897,8 +3942,8 @@ body:has(.idle-overlay) .roam-buddy {
   grid-template-columns: minmax(0, 1fr) 24px 24px;
   align-items: center;
   gap: 3px;
-  min-height: 48px;
-  padding: 5px;
+  min-height: 44px;
+  padding: 4px 5px;
   border-radius: 9px;
 }
 
@@ -4210,19 +4255,14 @@ body:has(.idle-overlay) .roam-buddy {
   top: 4px;
   right: 4px;
   display: grid;
-  place-items: center;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  opacity: 0;
-  transition: opacity 0.15s;
+  color: var(--ink-soft);
+  font-size: var(--fs-caption);
+  text-align: center;
 }
 
-.port-tile:hover .remove {
-  opacity: 0.75;
+.reading-empty > svg {
+  color: #64d2ff;
 }
-
-/* Toolbox */
 .tool-body {
   display: flex;
   flex: 1;

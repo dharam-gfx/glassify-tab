@@ -65,7 +65,7 @@ export const WIDGET_CATALOG = {
   weather: { name: 'Weather', description: 'Live conditions and next hours', category: 'time', icon: CloudSun, span: 'span-2x2', Component: WeatherWidget },
   calendar: { name: 'Calendar', description: 'Month view with today highlighted', category: 'time', icon: CalendarDays, span: 'span-2x2', Component: CalendarWidget },
   worldClock: { name: 'World Clock', description: 'Time in up to 5 cities', category: 'time', icon: Globe2, span: 'span-2x2', Component: WorldClockWidget },
-  progress: { name: 'Reading Queue', description: 'Save links, read the next article, and track what you finished', category: 'productivity', icon: BookmarkPlus, span: 'span-2x2', Component: ReadingQueueWidget },
+  progress: { name: 'Reading Queue', description: 'Save links, read the next article, and track what you finished', category: 'productivity', icon: BookmarkPlus, span: 'span-2x3', Component: ReadingQueueWidget },
   toolbox: { name: 'Dev Toolbox', description: 'Timestamp, UUID, Base64, URL and JSON tools', category: 'developer', icon: Wrench, span: 'span-4x2', Component: ToolboxWidget },
   ghRepos: { name: 'GitHub Repos', description: 'Stars, forks and issues for repos you follow', category: 'developer', icon: Github, span: 'span-2x2', Component: GitHubReposWidget },
   prs: { name: 'Pull Requests', description: 'Your open PRs and review requests (token)', category: 'developer', icon: GitPullRequest, span: 'span-2x2', Component: PullRequestsWidget },
