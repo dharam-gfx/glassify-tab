@@ -3985,10 +3985,35 @@ body:has(.idle-overlay) .roam-buddy {
   max-height: 280px;
 }
 
+.widget-slot[data-widget-size] > .hn-widget {
+  align-self: flex-start;
+  flex: 0 0 auto;
+  width: 100%;
+}
+
 .hn-widget .dev-list {
+  height: 150px;
   max-height: 150px;
   scrollbar-width: thin;
   scrollbar-color: rgb(255 255 255 / 0.35) transparent;
+}
+
+.widget-slot[data-widget-size$="x1"] .hn-widget {
+  max-height: 220px;
+}
+
+.widget-slot[data-widget-size$="x1"] .hn-widget .dev-list {
+  height: 100px;
+  max-height: 100px;
+}
+
+.widget-slot[data-widget-size$="x3"] .hn-widget {
+  max-height: 360px;
+}
+
+.widget-slot[data-widget-size$="x3"] .hn-widget .dev-list {
+  height: 240px;
+  max-height: 240px;
 }
 
 .dev-widget.toolbox-widget,

@@ -164,6 +164,7 @@ export default function WidgetSlot({ id, layout, defaultSize = '2x2', mode = 'gr
     <div
       ref={slotRef}
       className={`widget-slot${over ? ' drop-target' : ''}`}
+      data-widget-size={id === 'hn' ? displaySize : undefined}
       style={placementStyle}
       draggable={editMode}
       onDragStart={(e) => {
