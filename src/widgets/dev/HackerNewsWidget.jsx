@@ -21,7 +21,7 @@ export default function HackerNewsWidget({ span = 'span-2x2' }) {
   return (
     <WidgetShell
       span={span}
-      className="dev-widget"
+      className="dev-widget hn-widget"
       title={
         <DevTitle icon={Newspaper} color="#ff6600">
           Hacker News
@@ -30,7 +30,7 @@ export default function HackerNewsWidget({ span = 'span-2x2' }) {
       action={<RefreshButton query={query} />}
     >
       <Chips value={kind} onChange={setKind} options={KINDS} />
-      <QueryBody query={query} rows={5}>
+      <QueryBody query={query} rows={3}>
         {(stories) => (
           <ol className="dev-list">
             {stories.map((s, i) => {

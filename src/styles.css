@@ -3981,6 +3981,16 @@ body:has(.idle-overlay) .roam-buddy {
   max-height: 340px;
 }
 
+.hn-widget {
+  max-height: 280px;
+}
+
+.hn-widget .dev-list {
+  max-height: 150px;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.35) transparent;
+}
+
 .dev-widget.toolbox-widget,
 .widget-slot.span-4x2>.dev-widget {
   max-height: 300px;
