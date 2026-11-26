@@ -80,7 +80,6 @@ Enable or remove widgets through Glassify Studio. Widget selection and ordering 
 | Developer | Pull Requests | View your open pull requests and review requests; requires a GitHub token. |
 | Developer | Contributions | View GitHub activity and streaks; requires a GitHub token. |
 | Developer | Hacker News | Read top, new, best, and Show HN stories. |
-| Developer | Service Status | Check supported services such as GitHub, Cloudflare, Vercel, and npm. |
 | Developer | npm Packages | View package versions and weekly downloads. |
 | Developer | Snippets | Save commands and copy them quickly. |
 | Developer | Localhost | Keep shortcuts to local development servers. |
@@ -89,11 +88,19 @@ Enable or remove widgets through Glassify Studio. Widget selection and ordering 
 | Browser | Browser Boost | Free memory, clear cache, and close duplicate tabs. |
 | System | System Performance | Monitor CPU usage, memory, and tab count. |
 
+### Widget Screenshots and Usage
+
+See the [complete widget guide](docs/widgets.md) for screenshots, controls, and setup requirements for all 22 widgets.
+
+| Tasks | Notes | Focus Timer |
+| --- | --- | --- |
+| ![Tasks widget with open and completed tasks](docs/screenshots/widget-tasks.png) | ![Notes widget with a sample auto-saved note](docs/screenshots/widget-notes.png) | ![Focus Timer with a 25-minute session](docs/screenshots/widget-focus.png) |
+
 ## Requirements
 
 - Node.js 18+ and npm for local development and builds.
 - Google Chrome with support for Manifest V3 extensions.
-- Internet access for live weather, GitHub, news, package, and service-status data.
+- Internet access for live weather, GitHub, news, and package data.
 
 ## Local Development
 
@@ -158,7 +165,15 @@ Log a drink with the +150, +250, or +500 mL controls and use Undo to reverse the
 
 The full-screen preview shows the buddy alongside the dashboard when a drink is overdue. Reduced motion was enabled for the capture to keep the buddy stationary.
 
+#### Buddy on Every Website
+
 The optional **Buddy on every website** setting allows the buddy to appear on other websites. Enabling it requests additional website access. Background reminders and notifications require the installed extension and may depend on browser or operating-system notification settings.
+
+Hover over the buddy on the dashboard, in its preview, or on another website to pause it and show the compact drink pills: Sip (+150 mL), Glass (+250 mL), or Bottle (+500 mL). You can also focus the buddy with Tab and press Enter to reach the drink options. Logging a drink updates the Hydration widget and sends the buddy off with a thank-you.
+
+![Website hydration buddy with compact +150 mL, +250 mL, and +500 mL drink pills open above it](docs/screenshots/hydration-buddy-website.png)
+
+Website-buddy UI preview on a sample webpage, showing the hover-to-log drink options.
 
 ### GitHub Integration
 

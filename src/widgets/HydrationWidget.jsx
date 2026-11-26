@@ -14,6 +14,7 @@ import {
   playDrop,
   playGulp,
   PREVIEW_BUDDY_EVENT,
+  QUICK_DRINKS,
   setRoamEverywhere,
   shouldAlert,
   today,
@@ -104,11 +105,6 @@ function statusText(s, now) {
 }
 
 const GLASS_ML = 250;
-const QUICK = [
-  [150, 'Sip'],
-  [250, 'Glass'],
-  [500, 'Bottle'],
-];
 
 function GlassMeter({ intake, goal }) {
   const glasses = Math.round(goal / GLASS_ML);
@@ -322,7 +318,7 @@ export default function HydrationWidget({ span = 'span-2x2' }) {
       </div>
       <div className="hydra-actions">
         <div className="hydra-quick" role="group" aria-label="Log water">
-          {QUICK.map(([ml, name]) => (
+          {QUICK_DRINKS.map(([ml, name]) => (
             <button key={ml} onClick={() => log(ml)} title={`${name}, ${ml} mL`} aria-label={`Log ${ml} mL`}>
               +{ml}
             </button>

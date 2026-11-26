@@ -159,7 +159,7 @@ export const DEFAULT_SPACE_PRESETS = [
     tileIds: ['github', 'google', 'youtube', 'notion', 'gmail', 'stackoverflow', 'mdn', 'npmjs', 'gitlab', 'vercel', 'codepen', 'postman', 'dockerhub', 'replit'],
     previousTileIds: ['github', 'google', 'youtube', 'notion', 'gmail'],
     addedTileIds: ['stackoverflow', 'mdn', 'npmjs', 'gitlab', 'vercel', 'codepen', 'postman', 'dockerhub', 'replit'],
-    widgetIds: ['toolbox', 'ghRepos', 'prs', 'contributions', 'hn', 'status', 'npm', 'snippets', 'localhost', 'notes', 'tasks'],
+    widgetIds: ['toolbox', 'ghRepos', 'prs', 'contributions', 'hn', 'npm', 'snippets', 'localhost', 'notes', 'tasks'],
   },
 ];
 

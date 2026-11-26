@@ -7,6 +7,7 @@
     const W = 72;
     const H = 88;
     const SPEED = 110;
+    const QUICK = [[150, 'Sip'], [250, 'Glass'], [500, 'Bottle']];
     const RELATIONSHIP_LINES = {
         mom: ['{name}, sip before Mom calls!', 'Mom says: water, now!', '{name}, even plants drink!'],
         daddy: ['Hydrate like a champ, {name}!', 'Dad says: less scroll, more water!', 'Water break, {name}. Dad orders!'],
@@ -52,6 +53,21 @@
       transform: translateX(calc(-50% + var(--bubble-shift, 0px))); animation: pop .35s cubic-bezier(.32,.72,0,1); }
     .bubble::after { content: ""; position: absolute; top: 100%; left: calc(50% + var(--bubble-tail-shift, 0px)); margin-left: -5px; border: 5px solid transparent; border-top-color: #fff; }
     .bubble[hidden] { display: none; }
+    .figure { pointer-events: auto; cursor: pointer; border-radius: 50%; }
+    .figure:focus-visible { outline: 2px solid #0a84ff; outline-offset: 2px; }
+    .drink-menu { position: absolute; bottom: 100%; left: 50%; transform: translateX(calc(-50% + var(--bubble-shift, 0px)));
+      box-sizing: border-box; width: min(210px, calc(100vw - 24px)); max-height: calc(100vh - ${H + 24}px); overflow: auto;
+      padding: 4px; border-radius: 24px; background: #fff; color: #1c1c1e; box-shadow: 0 4px 14px rgb(0 0 0 / .2);
+      pointer-events: auto; font-size: 11px; line-height: 16px; text-align: center; }
+    .drink-menu[hidden], .interacting .bubble { display: none; }
+    .drink-options { display: flex; gap: 8px; }
+    .drink-options button { flex: 1; min-width: 0; padding: 8px 4px; border: 0; border-radius: 20px;
+      background: #eef7ff; color: #0b2540; font: inherit; font-weight: 600; white-space: nowrap; cursor: pointer; }
+    .drink-options button:hover, .drink-options button:focus-visible { background: #d6ecff; outline: 2px solid #0a84ff; }
+    .drink-options button:disabled { opacity: .6; cursor: wait; }
+    .drink-status { display: block; padding: 4px 8px; color: #b42318; }
+    .drink-status:empty { display: none; }
+    .leaving .figure { pointer-events: none; }
     @keyframes step { from { transform: rotate(-22deg); } to { transform: rotate(22deg); } }
     @keyframes hop { to { transform: translateY(-4px); } }
     @keyframes wave { from { transform: rotate(-18deg); } to { transform: rotate(14deg); } }
@@ -87,6 +103,8 @@
     let lastDrink = 0;
     let buddyTarget = 'friend';
     let userName = '';
+    let interacting = false;
+    let saving = false;
 
     function pickLine() {
         const lines = RELATIONSHIP_LINES[buddyTarget] || RELATIONSHIP_LINES.friend;
@@ -120,12 +138,70 @@
 
     function fitBubble() {
         if ( !parts || parts.bubble.hidden || !pos ) return;
-        const width = parts.bubble.offsetWidth;
+        fitOverlay( parts.bubble );
+    }
+
+    function fitOverlay( overlay ) {
+        const width = overlay.offsetWidth;
         const left = pos.x + W / 2 - width / 2;
         const shift = left < 12 ? 12 - left : left + width > window.innerWidth - 12 ? window.innerWidth - 12 - left - width : 0;
         const tailShift = Math.max( -width / 2 + 10, Math.min( width / 2 - 10, -shift ) );
-        parts.bubble.style.setProperty( '--bubble-shift', `${shift}px` );
-        parts.bubble.style.setProperty( '--bubble-tail-shift', `${tailShift}px` );
+        overlay.style.setProperty( '--bubble-shift', `${shift}px` );
+        overlay.style.setProperty( '--bubble-tail-shift', `${tailShift}px` );
+    }
+
+    function openMenu() {
+        if ( !host || interacting ) return;
+        interacting = true;
+        clearTimeout( timer );
+        const rect = parts.buddy.getBoundingClientRect();
+        parts.buddy.classList.remove( 'walking' );
+        parts.buddy.classList.add( 'interacting' );
+        parts.menu.hidden = false;
+        parts.figure.setAttribute( 'aria-expanded', 'true' );
+        place( {
+            x: Math.max( 0, Math.min( rect.left, window.innerWidth - W ) ),
+            y: Math.max( parts.menu.offsetHeight + 12, Math.min( rect.top, window.innerHeight - H - 12 ) ),
+        }, 0 );
+        fitOverlay( parts.menu );
+    }
+
+    function closeMenu() {
+        if ( !host || !interacting || saving ) return;
+        interacting = false;
+        parts.menu.hidden = true;
+        parts.figure.setAttribute( 'aria-expanded', 'false' );
+        parts.buddy.classList.remove( 'interacting' );
+        say( pickLine() );
+        if ( !reduceMotion ) timer = setTimeout( step, 3000 );
+    }
+
+    async function logDrink( ml ) {
+        if ( saving || !host ) return;
+        saving = true;
+        const activeParts = parts;
+        const buttons = activeParts.menu.querySelectorAll( 'button' );
+        buttons.forEach( ( button ) => { button.disabled = true; } );
+        activeParts.status.textContent = '';
+        try {
+            const { [KEY]: saved } = await chrome.storage.local.get( KEY );
+            if ( !saved ) throw new Error( 'Hydration settings are unavailable.' );
+            const s = saved.day === today() ? saved : { ...saved, day: today(), intake: 0, log: [] };
+            await chrome.storage.local.set( { [KEY]: {
+                ...s,
+                intake: s.intake + ml,
+                log: [...( s.log || [] ), ml].slice( -30 ),
+                lastDrink: Date.now(),
+                snoozeUntil: 0,
+            } } );
+            if ( parts === activeParts ) hide( true );
+        } catch ( error ) {
+            console.error( 'Glassify: could not log water.', error );
+            activeParts.status.textContent = 'Could not save your drink. Please try again.';
+        } finally {
+            saving = false;
+            buttons.forEach( ( button ) => { button.disabled = false; } );
+        }
     }
 
     function place( next, dur ) {
@@ -162,13 +238,39 @@
         if ( host ) return;
         host = document.createElement( 'glassify-buddy' );
         const root = host.attachShadow( { mode: 'closed' } );
-        root.innerHTML = `<style>${css}</style><div class="buddy"><span class="bubble" hidden></span><div class="figure">${svg}</div></div>`;
+        root.innerHTML = `<style>${css}</style><div class="buddy"><span class="bubble" hidden></span>
+          <div class="drink-menu" id="drink-menu" role="group" aria-label="Log water" hidden>
+            <div class="drink-options">${QUICK.map( ( [ml, name] ) =>
+                `<button type="button" data-ml="${ml}" aria-label="Log ${ml} mL" title="${name}, ${ml} mL">+${ml} mL</button>`
+            ).join( '' )}</div><span class="drink-status" role="status"></span>
+          </div><div class="figure" role="button" tabindex="0" aria-label="Log a drink of water" aria-expanded="false" aria-controls="drink-menu">${svg}</div></div>`;
         parts = {
             buddy: root.querySelector( '.buddy' ),
             figure: root.querySelector( '.figure' ),
             bubble: root.querySelector( '.bubble' ),
             face: root.querySelector( '.face' ),
+            menu: root.querySelector( '.drink-menu' ),
+            status: root.querySelector( '.drink-status' ),
         };
+        parts.buddy.addEventListener( 'mouseenter', openMenu );
+        parts.buddy.addEventListener( 'mouseleave', () => {
+            if ( !parts.buddy.matches( ':focus-within' ) ) closeMenu();
+        } );
+        parts.buddy.addEventListener( 'focusin', openMenu );
+        parts.buddy.addEventListener( 'focusout', ( event ) => {
+            if ( !parts.buddy.contains( event.relatedTarget ) && !parts.buddy.matches( ':hover' ) ) closeMenu();
+        } );
+        parts.figure.addEventListener( 'click', openMenu );
+        parts.figure.addEventListener( 'keydown', ( event ) => {
+            if ( event.key === 'Enter' || event.key === ' ' ) {
+                event.preventDefault();
+                openMenu();
+                parts.menu.querySelector( 'button' ).focus();
+            }
+        } );
+        parts.menu.querySelectorAll( 'button' ).forEach( ( button ) =>
+            button.addEventListener( 'click', () => logDrink( Number( button.dataset.ml ) ) )
+        );
         parts.face.innerHTML = thirstyFace;
         document.documentElement.appendChild( host );
         if ( reduceMotion ) {
@@ -183,6 +285,10 @@
     function hide( thanks ) {
         if ( !host ) return;
         clearTimeout( timer );
+        interacting = false;
+        parts.menu.hidden = true;
+        parts.buddy.classList.remove( 'interacting' );
+        parts.figure.tabIndex = -1;
         const leaving = host;
         host = null;
         pos = null;
@@ -217,7 +323,13 @@
     chrome.storage.onChanged.addListener( ( changes, area ) =>
         ( area === 'local' && changes[KEY] ) || ( area === 'sync' && changes.settings ) ? check() : undefined
     );
-    window.addEventListener( 'resize', fitBubble );
+    window.addEventListener( 'resize', () => {
+        fitBubble();
+        if ( interacting ) {
+            interacting = false;
+            openMenu();
+        }
+    } );
     document.addEventListener( 'visibilitychange', check );
     const poll = setInterval( check, 30_000 );
     check();

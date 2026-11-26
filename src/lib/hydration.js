@@ -8,6 +8,7 @@ const MINUTE = 60_000;
 
 export const INTERVALS = [15, 30, 40, 60];
 export const GOALS = [1500, 2000, 2500, 3000];
+export const QUICK_DRINKS = [[150, 'Sip'], [250, 'Glass'], [500, 'Bottle']];
 export const BUDDY_TARGETS = [
   { value: 'mom', label: 'Mom' },
   { value: 'daddy', label: 'Daddy' },

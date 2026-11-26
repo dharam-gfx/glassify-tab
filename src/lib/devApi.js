@@ -85,25 +85,6 @@ export async function ghContributions(token) {
   };
 }
 
-/* ---------- Service status (Atlassian Statuspage public API) ---------- */
-export const STATUS_SERVICES = [
-  { id: 'github', name: 'GitHub', host: 'www.githubstatus.com' },
-  { id: 'cloudflare', name: 'Cloudflare', host: 'www.cloudflarestatus.com' },
-  { id: 'vercel', name: 'Vercel', host: 'www.vercel-status.com' },
-  { id: 'netlify', name: 'Netlify', host: 'www.netlifystatus.com' },
-  { id: 'npm', name: 'npm', host: 'status.npmjs.org' },
-  { id: 'discord', name: 'Discord', host: 'discordstatus.com' },
-];
-
-export async function allServiceStatus() {
-  const results = await Promise.allSettled(STATUS_SERVICES.map((s) => getJson(`https://${s.host}/api/v2/status.json`)));
-  return STATUS_SERVICES.map((s, i) => {
-    const r = results[i];
-    if (r.status !== 'fulfilled') return { ...s, indicator: 'unknown', description: 'Status unavailable' };
-    return { ...s, indicator: r.value.status.indicator, description: r.value.status.description };
-  });
-}
-
 /* ---------- npm ---------- */
 export const NPM_PATTERN = /^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/;
 

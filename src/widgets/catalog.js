@@ -15,7 +15,6 @@ import {
   Newspaper,
   NotebookPen,
   Package,
-  Radio,
   Rocket,
   Server,
   Timer,
@@ -39,7 +38,6 @@ import LocalhostWidget from './dev/LocalhostWidget';
 import NpmWidget from './dev/NpmWidget';
 import PullRequestsWidget from './dev/PullRequestsWidget';
 import SnippetsWidget from './dev/SnippetsWidget';
-import StatusWidget from './dev/StatusWidget';
 import ToolboxWidget from './dev/ToolboxWidget';
 import BoostWidget from './BoostWidget';
 import EyeBreakWidget from './EyeBreakWidget';
@@ -71,7 +69,6 @@ export const WIDGET_CATALOG = {
   prs: { name: 'Pull Requests', description: 'Your open PRs and review requests (token)', category: 'developer', icon: GitPullRequest, span: 'span-2x2', Component: PullRequestsWidget },
   contributions: { name: 'Contributions', description: 'GitHub activity graph and streak (token)', category: 'developer', icon: GitCommitHorizontal, span: 'span-4x2', Component: ContributionsWidget },
   hn: { name: 'Hacker News', description: 'Top, new, best and Show HN stories', category: 'developer', icon: Newspaper, span: 'span-2x2', Component: HackerNewsWidget },
-  status: { name: 'Service Status', description: 'GitHub, Cloudflare, Vercel, npm and more', category: 'developer', icon: Radio, span: 'span-2x2', Component: StatusWidget },
   npm: { name: 'npm Packages', description: 'Latest version and weekly downloads', category: 'developer', icon: Package, span: 'span-2x2', Component: NpmWidget },
   snippets: { name: 'Snippets', description: 'Saved commands with one-click copy', category: 'developer', icon: Code2, span: 'span-2x2', Component: SnippetsWidget },
   localhost: { name: 'Localhost', description: 'Quick links to your dev servers', category: 'developer', icon: Server, span: 'span-2x2', Component: LocalhostWidget },

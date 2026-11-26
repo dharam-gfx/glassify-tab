@@ -1,5 +1,5 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { BUDDY_TARGETS, isThirsty, PREVIEW_BUDDY_EVENT, useHydration, useNow } from '../lib/hydration';
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import { BUDDY_TARGETS, drink, isThirsty, playGulp, PREVIEW_BUDDY_EVENT, QUICK_DRINKS, today, useHydration, useNow } from '../lib/hydration';
 import { useStore } from '../state/store';
 
 const W = 72;
@@ -105,7 +105,7 @@ function pickLine(targetKey, name) {
 
 export default function HydrationBuddy() {
   const { settings, editMode } = useStore();
-  const [state] = useHydration();
+  const [state, save] = useHydration();
   const now = useNow(10_000);
   const enabled = settings.layoutWidgets[settings.preset]?.includes('hydration');
   const due = !!state && enabled && isThirsty(state, now);
@@ -118,11 +118,19 @@ export default function HydrationBuddy() {
   const [pos, setPos] = useState({ x: -W, y: 0, dur: 0, flip: false });
   const [walking, setWalking] = useState(false);
   const [line, setLine] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const buddyRef = useRef(null);
+  const menuRef = useRef(null);
+  const menuId = useId();
   const posRef = useRef(null);
   const bubbleRef = useRef(null);
   const targetKey = state?.buddyTarget;
   const target = BUDDY_TARGETS.find((item) => item.value === state?.buddyTarget)?.label;
   const userName = settings.userName.trim();
+
+  useEffect(() => {
+    if (phase !== 'roaming') setMenuOpen(false);
+  }, [phase]);
 
   useEffect(() => {
     let timer;
@@ -160,19 +168,23 @@ export default function HydrationBuddy() {
       if (phase === 'hidden') posRef.current = null;
       return;
     }
+    if (menuOpen) return;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (preview) {
+    if (preview && !posRef.current) {
       const spot = { x: (window.innerWidth - W) / 2, y: window.innerHeight - H - 24 };
       posRef.current = spot;
       setPos({ ...spot, dur: 0, flip: false });
       setWalking(false);
       setLine(pickLine(targetKey, userName));
       if (reducedMotion) return;
-    } else if (reducedMotion) {
-      setPos({ x: window.innerWidth - W - 24, y: window.innerHeight - H - 24, dur: 0, flip: false });
+    } else if (reducedMotion && !posRef.current) {
+      const spot = { x: window.innerWidth - W - 24, y: window.innerHeight - H - 24 };
+      posRef.current = spot;
+      setPos({ ...spot, dur: 0, flip: false });
       setLine(pickLine(targetKey, userName));
       return;
     }
+    if (reducedMotion) return;
     if (!posRef.current) {
       posRef.current = { x: -W, y: window.innerHeight - H - 12 };
       setPos({ ...posRef.current, dur: 0, flip: false });
@@ -194,11 +206,11 @@ export default function HydrationBuddy() {
     };
     timer = setTimeout(step, preview ? 1800 : 400);
     return () => clearTimeout(timer);
-  }, [phase, preview, target, targetKey, userName]);
+  }, [phase, preview, target, targetKey, userName, menuOpen]);
 
   useLayoutEffect(() => {
-    const bubble = bubbleRef.current;
-    if (!line || !bubble) return undefined;
+    const bubble = menuOpen ? menuRef.current : bubbleRef.current;
+    if (!bubble) return undefined;
     const fit = () => {
       const width = bubble.offsetWidth;
       const left = pos.x + W / 2 - width / 2;
@@ -210,20 +222,71 @@ export default function HydrationBuddy() {
     fit();
     window.addEventListener('resize', fit);
     return () => window.removeEventListener('resize', fit);
-  }, [line, pos.x]);
+  }, [line, pos.x, menuOpen]);
+
+  const openMenu = () => {
+    if (phase !== 'roaming' || menuOpen || !state) return;
+    const rect = buddyRef.current.getBoundingClientRect();
+    const spot = {
+      x: Math.max(0, Math.min(rect.left, window.innerWidth - W)),
+      y: Math.max(52, Math.min(rect.top, window.innerHeight - H - 12)),
+    };
+    posRef.current = spot;
+    setPos((previous) => ({ ...previous, ...spot, dur: 0 }));
+    setWalking(false);
+    setMenuOpen(true);
+  };
+
+  const logDrink = (ml) => {
+    if (!state || phase !== 'roaming') return;
+    const current = state.day === today() ? state : { ...state, day: today(), intake: 0, log: [] };
+    save(drink(current, ml));
+    setPreview(false);
+    setMenuOpen(false);
+    if (!state.muted) playGulp();
+  };
 
   if (phase === 'hidden') return null;
 
   return (
     <div
+      ref={buddyRef}
       className={`roam-buddy${walking ? ' walking' : ''}${phase === 'leaving' ? ' leaving' : ''}`}
       style={{ transform: `translate(${pos.x}px, ${pos.y}px)`, transitionDuration: `${pos.dur}s` }}
-      aria-hidden="true"
+      onMouseEnter={openMenu}
+      onMouseLeave={(event) => {
+        if (!event.currentTarget.contains(document.activeElement)) setMenuOpen(false);
+      }}
+      onFocus={openMenu}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget) && !event.currentTarget.matches(':hover')) setMenuOpen(false);
+      }}
     >
-      {line && <span ref={bubbleRef} className="rb-bubble">{line}</span>}
-      <div className="rb-figure" style={{ transform: pos.flip ? 'scaleX(-1)' : undefined }}>
+      {line && !menuOpen && <span ref={bubbleRef} className="rb-bubble">{line}</span>}
+      {menuOpen && (
+        <div ref={menuRef} id={menuId} className="rb-drink-menu" role="group" aria-label="Log water">
+          {QUICK_DRINKS.map(([ml, name]) => (
+            <button key={ml} type="button" onClick={() => logDrink(ml)} title={`${name}, ${ml} mL`} aria-label={`Log ${ml} mL`}>
+              +{ml} mL
+            </button>
+          ))}
+        </div>
+      )}
+      <button
+        type="button"
+        className="rb-figure"
+        style={{ transform: pos.flip ? 'scaleX(-1)' : undefined }}
+        aria-label="Log a drink of water"
+        aria-expanded={menuOpen}
+        aria-controls={menuOpen ? menuId : undefined}
+        disabled={phase === 'leaving'}
+        onClick={() => {
+          openMenu();
+          requestAnimationFrame(() => menuRef.current?.querySelector('button')?.focus());
+        }}
+      >
         <Walker happy={phase === 'leaving'} />
-      </div>
+      </button>
     </div>
   );
 }
