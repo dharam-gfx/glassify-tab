@@ -117,7 +117,7 @@
     }
 
     function isThirsty( s, now ) {
-        if ( !s || !s.roamEverywhere || s.roam === false ) return false;
+        if ( !s || !s.roamEverywhere ||         s.roam === false || s.stopped ) return false;
         const intake = s.day === today() ? s.intake : 0;
         if ( intake >= s.goal || now < ( s.snoozeUntil || 0 ) ) return false;
         if ( s.workHours ) {
@@ -187,13 +187,19 @@
             const { [KEY]: saved } = await chrome.storage.local.get( KEY );
             if ( !saved ) throw new Error( 'Hydration settings are unavailable.' );
             const s = saved.day === today() ? saved : { ...saved, day: today(), intake: 0, log: [] };
-            await chrome.storage.local.set( { [KEY]: {
+            const next = {
                 ...s,
                 intake: s.intake + ml,
                 log: [...( s.log || [] ), ml].slice( -30 ),
                 lastDrink: Date.now(),
                 snoozeUntil: 0,
-            } } );
+            };
+            // Mirrors recordDay() in src/lib/hydration.js; also archives the previous day before it is replaced.
+            const { hydrationHistory: stored } = await chrome.storage.local.get( 'hydrationHistory' );
+            const history = { ...( stored || {} ) };
+            if ( saved.day !== today() && saved.intake > 0 ) history[saved.day] = { ml: saved.intake, goal: saved.goal };
+            history[next.day] = { ml: next.intake, goal: next.goal };
+            await chrome.storage.local.set( { [KEY]: next, hydrationHistory: history } );
             if ( parts === activeParts ) hide( true );
         } catch ( error ) {
             console.error( 'Glassify: could not log water.', error );

@@ -1,11 +1,6 @@
-import { Droplet, Eye, Settings2, Timer, Undo2, Volume2, VolumeX, X } from 'lucide-react';
+import { BarChart3, Droplet, Eye, Settings2, Timer, Undo2 } from 'lucide-react';
 import { useEffect, useId, useState } from 'react';
 import {
-  BUDDY_TARGETS,
-  GOALS,
-  INTERVALS,
-  WORK_END,
-  WORK_START,
   drink,
   goalMet,
   isQuiet,
@@ -15,7 +10,6 @@ import {
   playGulp,
   PREVIEW_BUDDY_EVENT,
   QUICK_DRINKS,
-  setRoamEverywhere,
   shouldAlert,
   today,
   undoDrink,
@@ -23,6 +17,8 @@ import {
   useNow,
 } from '../lib/hydration';
 import WidgetShell from './WidgetShell';
+import HydrationReport from '../components/HydrationReport';
+import HydrationSettings from '../components/HydrationSettings';
 
 const DROP = 'M50 6C50 6 16 50 16 78A34 34 0 0 0 84 78C84 50 50 6 50 6Z';
 const WAVE = 'M-100 0Q-87.5 -6 -75 0T-50 0T-25 0T0 0T25 0T50 0T75 0T100 0T125 0T150 0T175 0T200 0V140H-100Z';
@@ -99,6 +95,7 @@ function HydrationMascot({ level, mood }) {
 
 function statusText(s, now) {
   if (goalMet(s)) return 'Daily goal reached!';
+  if (s.stopped) return 'Reminders stopped';
   if (isQuiet(s, now)) return 'Paused until 9 AM';
   if (isThirsty(s, now)) return 'Time for a sip!';
   return `${(s.goal - s.intake).toLocaleString()} mL to go`;
@@ -132,6 +129,7 @@ function CountdownPill({ s, now }) {
   let label = `${mm}:${ss}`;
   let tone = left < 5 * 60_000 ? 'soon' : '';
   if (done) [label, tone] = ['Done', 'done'];
+  else if (s.stopped) [label, tone] = ['Stopped', 'quiet'];
   else if (quiet) [label, tone] = ['Paused', 'quiet'];
   else if (due) [label, tone] = ['Drink!', 'due'];
 
@@ -156,6 +154,7 @@ export default function HydrationWidget({ span = 'span-2x2' }) {
   const [celebrating, setCelebrating] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [pop, setPop] = useState(null);
+  const [reportOpen, setReportOpen] = useState(false);
 
   useEffect(() => {
     if (!state) return;
@@ -211,88 +210,25 @@ export default function HydrationWidget({ span = 'span-2x2' }) {
       >
         <Eye size={14} />
       </button>
-      {!settingsOpen && <CountdownPill s={state} now={now} />}
       <button
         className="hydra-icon-btn"
-        onClick={() => save({ ...state, muted: !state.muted })}
-        aria-label={state.muted ? 'Unmute reminders' : 'Mute reminders'}
-        title={state.muted ? 'Unmute reminders' : 'Mute reminders'}
+        onClick={() => setReportOpen(true)}
+        aria-label="Monthly hydration report"
+        title="Monthly report"
       >
-        {state.muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+        <BarChart3 size={14} />
       </button>
+      <CountdownPill s={state} now={now} />
       <button
         className="hydra-icon-btn"
-        onClick={() => setSettingsOpen((open) => !open)}
-        aria-label={settingsOpen ? 'Close hydration settings' : 'Hydration settings'}
-        aria-expanded={settingsOpen}
+        onClick={() => setSettingsOpen(true)}
+        aria-label="Hydration settings"
+        aria-haspopup="dialog"
       >
-        {settingsOpen ? <X size={14} /> : <Settings2 size={14} />}
+        <Settings2 size={14} />
       </button>
     </span>
   );
-
-  if (settingsOpen) {
-    const toggles = [
-      ['roam', 'Buddy on this dashboard'],
-      ['roamEverywhere', 'Buddy on every website'],
-      ['notify', 'Desktop notifications'],
-      ['workHours', `Work hours only (${WORK_START}–${WORK_END - 12} PM)`],
-    ];
-    const flip = async (key) => {
-      const value = key === 'roamEverywhere' ? await setRoamEverywhere(!state.roamEverywhere) : !state[key];
-      save({ ...state, [key]: value });
-    };
-    return (
-      <WidgetShell span={span} className="hydra-widget" title={header} action={actions}>
-        <div className="hydra-settings">
-          <span className="hydra-label">Remind every</span>
-          <div className="chip-row" role="group" aria-label="Reminder interval">
-            {INTERVALS.map((m) => (
-              <button key={m} className="chip" aria-pressed={state.interval === m} onClick={() => save({ ...state, interval: m })}>
-                {m}m
-              </button>
-            ))}
-          </div>
-          <span className="hydra-label">Daily goal</span>
-          <div className="chip-row" role="group" aria-label="Daily goal">
-            {GOALS.map((g) => (
-              <button key={g} className="chip" aria-pressed={state.goal === g} onClick={() => save({ ...state, goal: g })}>
-                {g / 1000}L
-              </button>
-            ))}
-          </div>
-          <div className="hydra-target-row">
-            <span className="hydra-label">Buddy for</span>
-            <select
-              className="field hydra-target-select"
-              aria-label="Buddy for"
-              value={state.buddyTarget}
-              onChange={(e) => save({ ...state, buddyTarget: e.target.value })}
-            >
-              {BUDDY_TARGETS.map((target) => (
-                <option key={target.value} value={target.value}>
-                  {target.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          {toggles.map(([key, label]) => (
-            <div key={key} className="hydra-toggle">
-              <span>{label}</span>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={state[key]}
-                aria-label={label}
-                className="hydra-switch"
-                onClick={() => flip(key)}
-              />
-            </div>
-          ))}
-        </div>
-      </WidgetShell>
-    );
-  }
 
   return (
     <WidgetShell span={span} className="hydra-widget" title={header} action={actions}>
@@ -334,6 +270,8 @@ export default function HydrationWidget({ span = 'span-2x2' }) {
           <Undo2 size={14} />
         </button>
       </div>
+      {reportOpen && <HydrationReport state={state} onClose={() => setReportOpen(false)} />}
+      {settingsOpen && <HydrationSettings state={state} save={save} onClose={() => setSettingsOpen(false)} />}
     </WidgetShell>
   );
 }

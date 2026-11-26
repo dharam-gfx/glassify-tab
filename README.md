@@ -151,13 +151,19 @@ Open **Glassify Studio** from the dashboard to change its appearance and content
 
 ### Hydration Buddy
 
-The Hydration widget supports water goals, intake tracking, and reminder settings. A buddy can appear on the dashboard when a drink is overdue.
+The Hydration widget supports water goals, intake tracking, a monthly report, and reminder settings. A buddy can appear on the dashboard when a drink is overdue.
 
 | Water Tracker | Reminder Settings |
 | --- | --- |
-| ![Hydration widget showing water intake, daily goal, reminder timer, and quick-log controls](docs/screenshots/hydration.png) | ![Hydration settings for reminder intervals, daily goals, buddy visibility, and notifications](docs/screenshots/hydration-settings.png) |
+| ![Hydration widget showing water intake, daily goal, reminder timer, report button, and quick-log controls](docs/screenshots/hydration.png) | ![Hydration settings popup with reminder interval, daily goal, buddy options, sound and notification switches, and a Stop hydration reminders button](docs/screenshots/hydration-settings.png) |
 
-Log a drink with the +150, +250, or +500 mL controls and use Undo to reverse the last drink. Open the widget's settings to choose a daily goal, reminder interval, buddy behavior, and notification preferences.
+Log a drink with the +150, +250, or +500 mL controls and use Undo to reverse the last drink. The gear button opens a settings popup for the daily goal, reminder interval, buddy behavior, notifications, and **Mute reminder sounds**. Use **Stop hydration reminders** at the bottom of the popup to pause every reminder, notification, and buddy appearance, including on other websites; the card shows "Stopped" until you choose **Resume hydration reminders**.
+
+#### Monthly Report
+
+![Monthly hydration report with totals, daily average, goal days, streaks, and a calendar of daily intake](docs/screenshots/hydration-report.png)
+
+The bar-chart button opens a monthly report with the total, daily average, goal-reached days, best day, current streak, and a calendar where each day fills to show how much you drank. Use the arrows to browse earlier months. History is stored only on your device (about the last 800 days) and the layout adapts to the window size. The screenshot uses sample data.
 
 #### Roaming Buddy
 

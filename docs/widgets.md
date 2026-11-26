@@ -45,6 +45,7 @@ Widget data in the web preview is separate from the installed extension. Install
 
 - Log water with **+150**, **+250**, or **+500 mL**; **Undo** reverses the last drink. Settings control the daily goal, reminder interval, buddy, sound, work hours, and notifications.
 - Use the eye button to preview the buddy. Hovering over it shows the drink pills; drinks logged in the preview count toward today's intake.
+- The bar-chart button opens a monthly report (totals, average, goal days, streaks, and a daily calendar). History is stored only on your device and adapts to any window size.
 - See the [Hydration Buddy guide](../README.md#hydration-buddy), including the [buddy on other websites](../README.md#buddy-on-every-website). Website access and background alerts require the installed extension.
 
 ### Reading Queue

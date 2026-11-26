@@ -22,7 +22,7 @@ function current( s ) {
 }
 
 function isThirsty( s, now ) {
-    if ( s.intake >= s.goal || now < ( s.snoozeUntil || 0 ) ) return false;
+    if ( s.stopped || s.intake >= s.goal || now < ( s.snoozeUntil || 0 ) ) return false;
     if ( s.workHours ) {
         const hour = new Date( now ).getHours();
         if ( hour < 9 || hour >= 18 ) return false;
@@ -221,7 +221,16 @@ chrome.notifications.onButtonClicked.addListener( async ( id, index ) => {
         index === 0
             ? { ...s, intake: s.intake + 250, log: [...( s.log || [] ), 250].slice( -30 ), lastDrink: now }
             : { ...s, snoozeUntil: now + SNOOZE_MIN * MINUTE };
-    await chrome.storage.local.set( { [KEY]: next } );
+    const update = { [KEY]: next };
+    if ( index === 0 ) {
+        // Mirrors recordDay() in src/lib/hydration.js; also archives the previous day before it is replaced.
+        const { hydrationHistory: stored } = await chrome.storage.local.get( 'hydrationHistory' );
+        const history = { ...( stored || {} ) };
+        if ( raw.day !== s.day && raw.intake > 0 ) history[raw.day] = { ml: raw.intake, goal: raw.goal };
+        history[next.day] = { ml: next.intake, goal: next.goal };
+        update.hydrationHistory = history;
+    }
+    await chrome.storage.local.set( update );
 } );
 
 chrome.notifications.onClicked.addListener( ( id ) => {

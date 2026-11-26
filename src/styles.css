@@ -1288,6 +1288,31 @@ html body {
   background: rgb(127 127 127 / 0.2);
 }
 
+.hydra-stop {
+  margin-top: 4px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgb(255 69 58 / 0.22);
+  box-shadow: inset 0 0 0 1px rgb(255 69 58 / 0.5);
+  color: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+
+.hydra-stop:hover {
+  background: rgb(255 69 58 / 0.36);
+}
+
+.hydra-stop.resume {
+  background: rgb(52 214 160 / 0.22);
+  box-shadow: inset 0 0 0 1px rgb(52 214 160 / 0.5);
+}
+
+.hydra-stop.resume:hover {
+  background: rgb(52 214 160 / 0.36);
+}
+
 .hydra-body {
   display: flex;
   flex: 1;
@@ -1295,6 +1320,240 @@ html body {
   gap: 14px;
   min-height: 0;
   padding: 2px 0 4px;
+}
+
+/* Monthly report dialog: fixed dark material so it stays readable on any wallpaper or glass setting */
+.hydra-report {
+  --hr-accent: #3bb4ff;
+  --hr-met: #34d6a0;
+  width: min(560px, 100%);
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  padding: clamp(14px, 3vw, 22px);
+  border: 1px solid rgb(255 255 255 / 0.16);
+  border-radius: 24px;
+  color: #fff;
+  background: linear-gradient(160deg, rgb(32 38 70 / 0.94), rgb(14 18 38 / 0.96));
+  box-shadow: 0 30px 80px -20px rgb(0 0 0 / 0.6);
+  animation: pop-in 0.35s var(--ease-spring);
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.hydra-settings-modal {
+  --ink-soft: rgb(255 255 255 / 0.65);
+  width: min(420px, 100%);
+}
+
+.hydra-settings-modal .hr-head h2 {
+  font-size: 17px;
+  font-weight: 650;
+}
+
+.hydra-settings-modal .hydra-settings {
+  gap: 10px;
+  overflow: visible;
+}
+
+.hydra-settings-modal .hydra-toggle {
+  font-size: 14px;
+}
+
+.hr-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.hr-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.hr-nav h2 {
+  min-width: 9ch;
+  overflow: hidden;
+  font-size: clamp(15px, 2.4vw, 18px);
+  font-weight: 650;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hr-icon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: rgb(255 255 255 / 0.8);
+  background: rgb(255 255 255 / 0.08);
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.hr-icon:hover:not(:disabled) {
+  background: rgb(255 255 255 / 0.18);
+}
+
+.hr-icon:focus-visible {
+  outline: 2px solid var(--hr-accent);
+  outline-offset: 2px;
+}
+
+.hr-icon:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.hr-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.hr-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.07);
+}
+
+.hr-stat strong {
+  overflow: hidden;
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hr-stat-label,
+.hr-stat-hint {
+  color: rgb(255 255 255 / 0.62);
+  font-size: 11px;
+}
+
+.hr-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: clamp(3px, 1vw, 6px);
+}
+
+.hr-weekday {
+  padding-bottom: 2px;
+  color: rgb(255 255 255 / 0.55);
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.hr-day {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: clamp(6px, 1.6vw, 12px);
+  background: rgb(255 255 255 / 0.07);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06);
+  font-variant-numeric: tabular-nums;
+}
+
+.hr-day i {
+  position: absolute;
+  inset: auto 0 0;
+  height: calc(var(--fill) * 100%);
+  background: linear-gradient(to top, rgb(59 180 255 / 0.75), rgb(59 180 255 / 0.4));
+  transition: height 0.4s var(--ease-spring);
+}
+
+.hr-day.met i {
+  background: linear-gradient(to top, rgb(52 214 160 / 0.85), rgb(52 214 160 / 0.5));
+}
+
+.hr-day b {
+  position: relative;
+  font-size: clamp(10px, 2.4vw, 13px);
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.5);
+}
+
+.hr-day.future {
+  opacity: 0.35;
+}
+
+.hr-day.today {
+  box-shadow: inset 0 0 0 2px #fff;
+}
+
+.hr-empty {
+  margin-top: 12px;
+  color: rgb(255 255 255 / 0.7);
+  text-align: center;
+}
+
+.hr-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  margin-top: 14px;
+  color: rgb(255 255 255 / 0.65);
+  font-size: 11px;
+}
+
+.hr-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hr-legend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: rgb(255 255 255 / 0.12);
+}
+
+.hr-legend i.partial {
+  background: rgb(59 180 255 / 0.65);
+}
+
+.hr-legend i.full {
+  background: rgb(52 214 160 / 0.85);
+}
+
+.hr-legend em {
+  margin-left: auto;
+  font-style: normal;
+  opacity: 0.8;
+}
+
+@media (max-width: 420px) {
+  .hr-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hr-legend em {
+    margin-left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hydra-report,
+  .hr-day i {
+    animation: none;
+    transition: none;
+  }
 }
 
 .hydra-mascot {

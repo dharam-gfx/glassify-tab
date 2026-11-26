@@ -28,6 +28,7 @@ const DEFAULTS = {
   lastDrink: 0,
   lastAlert: 0,
   muted: false,
+  stopped: false,
   roam: true,
   workHours: false,
   notify: true,
@@ -37,6 +38,42 @@ const DEFAULTS = {
 };
 
 export const today = () => new Date().toLocaleDateString('en-CA');
+
+// Per-day totals ({ 'YYYY-MM-DD': { ml, goal } }) kept in local storage for the monthly report.
+const HISTORY_KEY = 'hydrationHistory';
+const HISTORY_EVENT = 'glassify:hydration-history';
+const HISTORY_DAYS = 800;
+
+export async function recordDay(day, ml, goal) {
+  if (!day) return;
+  const stored = (await storage.get('local', [HISTORY_KEY]))[HISTORY_KEY];
+  const history = { ...(stored && typeof stored === 'object' ? stored : {}) };
+  if (ml > 0) history[day] = { ml, goal };
+  else delete history[day];
+  const days = Object.keys(history).sort();
+  for (const old of days.slice(0, Math.max(0, days.length - HISTORY_DAYS))) delete history[old];
+  await storage.set('local', { [HISTORY_KEY]: history });
+  window.dispatchEvent(new CustomEvent(HISTORY_EVENT, { detail: history }));
+}
+
+export function useHydrationHistory() {
+  const [history, setHistory] = useState(null);
+  useEffect(() => {
+    let live = true;
+    const load = () => storage.get('local', [HISTORY_KEY]).then((r) => live && setHistory(r[HISTORY_KEY] ?? {}));
+    const onChrome = (changes, area) => area === 'local' && changes[HISTORY_KEY] && load();
+    const chromeEvents = typeof chrome !== 'undefined' ? chrome.storage?.onChanged : null;
+    load();
+    window.addEventListener(HISTORY_EVENT, load);
+    chromeEvents?.addListener(onChrome);
+    return () => {
+      live = false;
+      window.removeEventListener(HISTORY_EVENT, load);
+      chromeEvents?.removeListener(onChrome);
+    };
+  }, []);
+  return history;
+}
 
 function normalize(saved) {
   const s = { ...DEFAULTS, ...saved };
@@ -55,9 +92,20 @@ export function useHydration() {
 
   useEffect(() => {
     let live = true;
-    storage.get('local', [KEY]).then((r) => live && setState(normalize(r[KEY])));
+    storage.get('local', [KEY]).then((r) => {
+      if (!live) return;
+      const saved = r[KEY];
+      // Archive a previous day's total before normalize() resets it, and catch logs made on other sites.
+      if (saved?.day) recordDay(saved.day, saved.intake, saved.goal ?? DEFAULTS.goal);
+      setState(normalize(saved));
+    });
     const onLocal = (e) => setState(e.detail);
-    const onChrome = (changes, area) => area === 'local' && changes[KEY]?.newValue && setState(normalize(changes[KEY].newValue));
+    const onChrome = (changes, area) => {
+      const next = area === 'local' && changes[KEY]?.newValue;
+      if (!next) return;
+      if (next.day === today()) recordDay(next.day, next.intake, next.goal);
+      setState(normalize(next));
+    };
     const chromeEvents = typeof chrome !== 'undefined' ? chrome.storage?.onChanged : null;
     window.addEventListener(SYNC_EVENT, onLocal);
     chromeEvents?.addListener(onChrome);
@@ -72,6 +120,7 @@ export function useHydration() {
     const value = normalize(next);
     window.dispatchEvent(new CustomEvent(SYNC_EVENT, { detail: value }));
     storage.set('local', { [KEY]: value });
+    recordDay(value.day, value.intake, value.goal);
   }, []);
 
   return [state, save];
@@ -93,7 +142,7 @@ export const isQuiet = (s, now) => {
 };
 export const goalMet = (s) => s.intake >= s.goal;
 export const nextDrinkAt = (s) => s.lastDrink + s.interval * MINUTE;
-export const isThirsty = (s, now) => !goalMet(s) && !isQuiet(s, now) && now >= s.snoozeUntil && now >= nextDrinkAt(s);
+export const isThirsty = (s, now) => !s.stopped && !goalMet(s) && !isQuiet(s, now) && now >= s.snoozeUntil && now >= nextDrinkAt(s);
 export const shouldAlert = (s, now) => isThirsty(s, now) && now >= Math.max(s.lastDrink, s.lastAlert) + s.interval * MINUTE;
 
 export const drink = (s, ml) => ({ ...s, intake: s.intake + ml, log: [...s.log, ml].slice(-30), lastDrink: Date.now(), snoozeUntil: 0 });
