@@ -1,5 +1,5 @@
 import { BarChart3, Droplet, Eye, Settings2, Timer, Undo2 } from 'lucide-react';
-import { useEffect, useId, useState } from 'react';
+import { lazy, Suspense, useEffect, useId, useState } from 'react';
 import {
   drink,
   goalMet,
@@ -17,8 +17,8 @@ import {
   useNow,
 } from '../lib/hydration';
 import WidgetShell from './WidgetShell';
-import HydrationReport from '../components/HydrationReport';
-import HydrationSettings from '../components/HydrationSettings';
+const HydrationReport = lazy(() => import('../components/HydrationReport'));
+const HydrationSettings = lazy(() => import('../components/HydrationSettings'));
 
 const DROP = 'M50 6C50 6 16 50 16 78A34 34 0 0 0 84 78C84 50 50 6 50 6Z';
 const WAVE = 'M-100 0Q-87.5 -6 -75 0T-50 0T-25 0T0 0T25 0T50 0T75 0T100 0T125 0T150 0T175 0T200 0V140H-100Z';
@@ -270,8 +270,10 @@ export default function HydrationWidget({ span = 'span-2x2' }) {
           <Undo2 size={14} />
         </button>
       </div>
-      {reportOpen && <HydrationReport state={state} onClose={() => setReportOpen(false)} />}
-      {settingsOpen && <HydrationSettings state={state} save={save} onClose={() => setSettingsOpen(false)} />}
+      <Suspense fallback={null}>
+        {reportOpen && <HydrationReport state={state} onClose={() => setReportOpen(false)} />}
+        {settingsOpen && <HydrationSettings state={state} save={save} onClose={() => setSettingsOpen(false)} />}
+      </Suspense>
     </WidgetShell>
   );
 }

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import WidgetShell from './WidgetShell';
+import { startVisibleInterval } from '../lib/useVisibleInterval';
 
 const hasSystem = () => typeof chrome !== 'undefined' && !!chrome.system?.cpu && !!chrome.system?.memory;
 const GB = 1024 ** 3;
@@ -76,11 +77,10 @@ export default function SystemPerfWidget({ span = 'span-4x2' }) {
       }));
     };
 
-    poll();
-    const timer = setInterval(poll, 2000);
+    const stopPolling = startVisibleInterval(poll, 2000);
     return () => {
       live = false;
-      clearInterval(timer);
+      stopPolling();
     };
   }, []);
 

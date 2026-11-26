@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { DevTitle } from './dev/shared';
 import Ring from './Ring';
 import WidgetShell from './WidgetShell';
+import { startVisibleInterval } from '../lib/useVisibleInterval';
 
 const GB = 1024 ** 3;
 const hasApis = () => typeof chrome !== 'undefined' && !!chrome.tabs && !!chrome.system?.memory;
@@ -56,11 +57,7 @@ export default function BoostWidget({ span = 'span-2x2' }) {
 
   const refresh = useCallback(() => hasApis() && readStats().then(setStats).catch(() => {}), []);
 
-  useEffect(() => {
-    refresh();
-    const timer = setInterval(refresh, 5000);
-    return () => clearInterval(timer);
-  }, [refresh]);
+  useEffect(() => startVisibleInterval(refresh, 5000), [refresh]);
 
   const run = async (key, task) => {
     setStatus((s) => ({ ...s, [key]: 'busy' }));
