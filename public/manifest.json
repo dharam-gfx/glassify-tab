@@ -3,7 +3,7 @@
   "name": "Glassify Tab",
   "short_name": "Glassify",
   "version": "1.0.0",
-  "description": "An iOS 18 / visionOS-inspired liquid glass New Tab dashboard with bento layouts, widgets and a live customization studio.",
+  "description": "A glass-effect, iOS-inspired New Tab dashboard with bento layouts, widgets and a live customization studio.",
   "chrome_url_overrides": {
     "newtab": "index.html"
   },
