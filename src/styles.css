@@ -5635,3 +5635,56 @@ textarea.tool-input {
     animation-duration: 0.01ms !important;
   }
 }
+/* First-run welcome tour (no blur, no animation: kept cheap on purpose) */
+.tour-layer { position: fixed; inset: 0; z-index: 400; }
+.tour-dim { position: absolute; inset: 0; background: rgb(0 0 0 / 0.5); }
+.tour-spot {
+  position: fixed;
+  border-radius: 14px;
+  box-shadow: 0 0 0 9999px rgb(0 0 0 / 0.5), 0 0 0 3px rgb(79 172 254 / 1), 0 0 0 5px rgb(0 0 0 / 0.5);
+  pointer-events: none;
+  animation: tour-pulse 2s ease-in-out infinite;
+}
+@keyframes tour-pulse {
+  0%, 100% { box-shadow: 0 0 0 9999px rgb(0 0 0 / 0.5), 0 0 0 3px rgb(79 172 254 / 1), 0 0 0 5px rgb(0 0 0 / 0.5); }
+  50% { box-shadow: 0 0 0 9999px rgb(0 0 0 / 0.5), 0 0 0 3px rgb(79 172 254 / 1), 0 0 15px 5px rgb(79 172 254 / 0.3); }
+}
+.tour-card {
+  position: fixed;
+  padding: 16px 16px 12px;
+  border-radius: 16px;
+  color: #fff;
+  background: rgb(18 20 28 / 0.96);
+  border: 1px solid rgb(255 255 255 / 0.16);
+  box-shadow: 0 18px 50px rgb(0 0 0 / 0.5);
+  backdrop-filter: blur(16px);
+}
+.tour-card h2 { margin: 0 0 6px; font-size: 15px; font-weight: 700; }
+.tour-card p { margin: 0; font-size: 13px; line-height: 1.5; color: rgb(255 255 255 / 0.78); }
+.tour-foot { display: flex; align-items: center; gap: 6px; margin-top: 14px; }
+.tour-count { margin-right: auto; font-size: 11px; color: rgb(255 255 255 / 0.55); }
+.tour-btn {
+  padding: 6px 14px;
+  border: 0;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #111;
+  background: #fff;
+  transition: all 0.2s ease;
+}
+.tour-btn:hover { background: rgb(255 255 255 / 0.9); }
+.tour-btn.ghost { color: rgb(255 255 255 / 0.8); background: rgb(255 255 255 / 0.1); }
+.tour-btn.ghost:hover { background: rgb(255 255 255 / 0.15); }
+.tour-btn:focus-visible { outline: 2px solid #8ab4ff; outline-offset: 2px; }
+
+/* Space settings form in Studio drawer */
+.space-settings-form { font-size: 13px; }
+.space-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.space-badge { font-size: 20px; }
+.space-header h3 { margin: 0; font-size: 15px; font-weight: 600; color: #fff; }
+.space-settings-form .ctl-label { font-size: 12px; font-weight: 600; color: rgb(255 255 255 / 0.72); text-transform: uppercase; letter-spacing: 0.3px; }
+.space-settings-form .field { font-size: 13px; padding: 6px 10px; border-radius: 6px; background: rgb(255 255 255 / 0.08); border: 1px solid rgb(255 255 255 / 0.1); color: #fff; }
+.space-settings-form .field::placeholder { color: rgb(255 255 255 / 0.4); }
+.space-settings-form .hint { font-size: 11px; color: rgb(255 255 255 / 0.55); }

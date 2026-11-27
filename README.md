@@ -149,6 +149,17 @@ Open **Glassify Studio** from the dashboard to change its appearance and content
 5. Edit shortcut tiles to change their destinations, labels, and icons.
 6. Optionally set your name for the clock screen and Hydration widget.
 
+### Welcome Tour Keyboard Controls
+
+The welcome tour covers the dashboard and every Glassify Studio section. Replay it from **Glassify Studio > Backup > Replay welcome tour**.
+
+- **Tab / Shift+Tab:** Move between the tour buttons without leaving the dialog.
+- **Enter / Space:** Activate the focused Back, Next, Skip, or Done button.
+- **Left / Right Arrow:** Go back or forward; Right Arrow finishes on the last step.
+- **Escape:** Skip the tour.
+
+Finishing or skipping closes any Studio drawer opened by the tour and restores keyboard focus.
+
 ### Hydration Buddy
 
 The Hydration widget supports water goals, intake tracking, a monthly report, and reminder settings. A buddy can appear on the dashboard when a drink is overdue.

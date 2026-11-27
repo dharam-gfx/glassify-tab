@@ -694,6 +694,15 @@ export default function StudioDrawer() {
                     </div>
                     <input ref={backupRef} type="file" accept="application/json,.json" hidden onChange={onImport} />
                     {backupMsg && <p className="hint">{backupMsg}</p>}
+                    <button
+                        className="btn mt-2 w-full"
+                        onClick={() => {
+                            setDrawerOpen( false );
+                            setTimeout( () => window.dispatchEvent( new Event( 'glassify:tour' ) ), 350 );
+                        }}
+                    >
+                        <Eye size={14} /> Replay welcome tour
+                    </button>
                     <button className="btn btn-danger mt-2 w-full" onClick={resetSettings}>
                         <RotateCcw size={14} /> Restore default appearance
                     </button>
